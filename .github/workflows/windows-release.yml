@@ -1,0 +1,62 @@
+name: Build Windows app
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: windows-release
+  cancel-in-progress: false
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+      - run: npm ci --prefix desktop
+      - run: node scripts/verify-renderer.cjs
+      - run: npm run desktop:verify
+      - name: Build Windows installer
+        run: npm run desktop:build
+        env:
+          CSC_LINK: ${{ secrets.WINDOWS_CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.WINDOWS_CSC_KEY_PASSWORD }}
+      - name: Test packaged app offline
+        run: npm run desktop:smoke -- --packaged
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vastu-windows-installer
+          path: |
+            release-artifacts/desktop/*.exe
+            release-artifacts/desktop/*.blockmap
+            release-artifacts/desktop/latest.yml
+          if-no-files-found: error
+      - name: Prepare draft release in this repository
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: pwsh
+        run: |
+          $desktopVersion = (Get-Content desktop/package.json | ConvertFrom-Json).version
+          $releaseTag = "v$desktopVersion"
+          if ($env:GITHUB_REF_TYPE -eq 'tag' -and $env:GITHUB_REF_NAME -ne $releaseTag) { throw 'Git tag must match desktop/package.json version.' }
+          $releaseAssets = @(Get-ChildItem release-artifacts/desktop -File | Where-Object { $_.Extension -in '.exe','.blockmap' -or $_.Name -eq 'latest.yml' } | ForEach-Object FullName)
+          $existing = gh release view $releaseTag --repo $env:GITHUB_REPOSITORY --json isDraft --jq .isDraft 2>$null
+          if ($LASTEXITCODE -eq 0) {
+            if ($existing -ne 'true') {
+              Write-Host "Release $releaseTag is already published. Bump desktop/package.json for the next release. Installer is in workflow artifacts."
+              exit 0
+            }
+            gh release upload $releaseTag @releaseAssets --repo $env:GITHUB_REPOSITORY --clobber
+          } else {
+            gh release create $releaseTag @releaseAssets --repo $env:GITHUB_REPOSITORY --draft --title "Vastu Grid $desktopVersion for Windows" --notes-file RELEASE_NOTES.md
+          }
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

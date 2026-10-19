@@ -1,0 +1,10 @@
+{
+  "name": "vastu-windows-workspace",
+  "private": true,
+  "scripts": {
+    "desktop:start": "npm --prefix desktop start",
+    "desktop:build": "npm --prefix desktop run dist",
+    "desktop:verify": "npm --prefix desktop run verify",
+    "desktop:smoke": "node desktop/tests/smoke.cjs"
+  }
+}

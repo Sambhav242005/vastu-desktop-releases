@@ -56,3 +56,5 @@ Draw roughly on the map, then click a side's length label, type the measured len
 For a rectangle, choose Rectangle, enter width/depth and rotation, and Apply. With an empty map, the tool first asks for one corner. Dashed outlines preview changes without saving them. Rotation 0 is horizontal on the map; the +/- controls turn by 5 degrees. Existing boundaries start unlocked, with an optional lock for protection.
 
 Review plot applies the boundary's dimensions to the grid. Corner coordinates remain available as optional details. Zoom reaches 24 by enlarging available tiles; it adds no imagery detail. Windows bundles its map library locally, so saved boundaries can be edited without imagery. DWG import is not included.
+
+Satellite zoom automatically falls back to the nearest available lower-resolution tile and enlarges its matching region. Missing tiles are requested with blankTile=false so gray provider placeholders are not drawn. Zoom 24 was checked against live Ratlam imagery; enlarged images can appear blurry. The fallback keeps all plot coordinates unchanged.

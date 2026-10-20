@@ -71,6 +71,25 @@ fs.writeFileSync(path.join(documents,'.vastu-test-root'),'test data only');
     const finalBoundary=await iframe.evaluate(()=>pts);
     await expect.poll(()=>page.evaluate(async()=>JSON.parse(await window.vastuDesktop.storage.getItem('vastu_workspace_v1')).projects.find(p=>p.id==='map-test').data.metadata.siteBoundary)).toEqual(finalBoundary);
     await page.screenshot({path:path.join(root,'work','map-precision-review.png')});
+    await page.getByRole('button',{name:'Continue editing',exact:true}).click();
+    const liveSatellite=process.argv.includes('--live-satellite');
+    const fixture=await page.evaluate(()=>{const c=document.createElement('canvas');c.width=c.height=256;const g=c.getContext('2d');g.fillStyle='#46734b';g.fillRect(0,0,256,256);return c.toDataURL('image/png').split(',')[1];});
+    await page.route('https://services.arcgisonline.com/**',async route=>{
+      if(liveSatellite){await route.continue();return;}
+      const url=new URL(route.request().url());
+      expect(url.searchParams.get('blankTile')).toBe('false');
+      const z=Number(url.pathname.split('/tile/')[1].split('/')[0]);
+      await route.fulfill({status:z>17?404:200,contentType:'image/png',headers:{'access-control-allow-origin':'*'},body:z>17?'':Buffer.from(fixture,'base64')});
+    });
+    await page.getByRole('button',{name:'Satellite',exact:true}).click();
+    await iframe.evaluate(()=>map.setView([23.331,75.041],24));
+    const satelliteTiles=frame.locator('canvas.leaflet-tile-loaded[data-source-zoom]');
+    await expect(satelliteTiles.first()).toBeVisible({timeout:30000});
+    await expect.poll(()=>satelliteTiles.evaluateAll(tiles=>tiles.some(t=>Number(t.dataset.sourceZoom)<Number(t.dataset.requestZoom)))).toBe(true);
+    expect(await iframe.evaluate(()=>map.getZoom())).toBe(24);
+    expect(await iframe.evaluate(()=>pts)).toEqual(finalBoundary);
+    await page.screenshot({path:path.join(root,'work',liveSatellite?'ratlam-satellite-zoom.png':'satellite-fallback-test.png')});
     console.log('Windows map UI passed: direct side editing + Enter, rectangle preview, corner delete, Undo, Make90, narrow layout, saved geometry.');
+    console.log('Satellite zoom passed: missing high-detail tiles enlarge available imagery at zoom 24; boundary unchanged.');
   } finally {await app.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});

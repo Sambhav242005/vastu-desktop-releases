@@ -1,5 +1,3 @@
-- Click a side length, type the measurement and press Enter.
-- Click a corner to set its angle, make it 90 degrees or delete it.
-- Create rectangles from width, depth and rotation with a live preview.
-- Keep the map visible while editing; coordinates are optional.
-- Improved zoom controls, opposite-side averages and offline map controls.
+- Keep satellite imagery visible when zooming past the detail available in an area.
+- Automatically enlarge the correct portion of the nearest available satellite tile.
+- Preserve map corner positions and precise measurement controls while zooming.

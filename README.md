@@ -10,8 +10,7 @@ Expo renderer. Android/Expo source stays private; CI does not access that repo.
 Install the EXE once. Projects, plans, exports and backups stay in **Documents / Vastu**.
 Core features work offline; maps and online services need internet. The current
 installer is unsigned, so Windows may display an unknown-publisher warning.
-Updates download from published releases and offer **Restart to update**, saving
-and backing up first. Draft releases are not offered to installed apps.
+Updates are announced inside the app. Choose **Download update** or **Later**. A circular icon and progress bar show the download; **Restart to update** saves and backs up before quiet installation and relaunch. Draft releases are not offered to installed apps.
 
 ## Build
 
@@ -30,7 +29,7 @@ Output: `release-artifacts/desktop/`. Data: `Documents/Vastu/projects.db`, `plan
 
 1. Commit Windows changes here. When shared UI changes, refresh the verified Expo
    export in `desktop/web-dist` and `renderer-manifest.json` first.
-2. Increment `desktop/package.json` and its lockfile; edit `RELEASE_NOTES.md`.
+2. Sync the shared Expo/Windows release version in the source project, refresh its renderer export and manifest version, then edit `RELEASE_NOTES.md`. The renderer and Windows package versions must match.
 3. Push to `main` or run **Actions / Build Windows app** manually.
 4. CI builds and tests, then creates or refreshes a **draft release** using the
    built-in GitHub token. No personal access token or private source access needed.
@@ -70,3 +69,5 @@ Version 1.1.8: drag the filled interior to move the entire plot while preserving
 Version 1.1.9: the compass and North button use geographic north independently of plot rotation. The grid still follows the plot sides. In View grid, choose Set entrance, then click the open wall. Its midpoint, outward direction and relative placement are saved and used in preview/PDF/DXF. Changing the plot angle updates the selected entrance direction; choosing a manual entrance replaces the clicked wall selection.
 
 Version 1.1.10 improves PDF report layout: severity labels no longer wrap, short findings tables stay together, and long tables repeat their headings with rows kept intact. Re-export existing reports to use the improved formatting.
+
+Version 1.1.11 adds the in-app update panel, progress ring/bar, retry and Later actions. Settings and the native window title display the installed version. CI checks renderer version alignment and exercises the complete update UI with offline fixtures, including save/backup before the silent-install request.

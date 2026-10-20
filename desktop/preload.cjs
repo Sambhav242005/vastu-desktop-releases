@@ -1,6 +1,16 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('vastuDesktop', {
+  getVersion:()=>ipcRenderer.invoke('vastu:version'),
+  updates:{
+    getState:()=>ipcRenderer.invoke('vastu:update:get'),
+    action:action=>ipcRenderer.invoke('vastu:update:action',action),
+    onState:callback=>{
+      const listener=(_event,state)=>callback(state);
+      ipcRenderer.on('vastu:update-state',listener);
+      return ()=>ipcRenderer.removeListener('vastu:update-state',listener);
+    },
+  },
   storage: {
     getItem: key => ipcRenderer.invoke('vastu:storage:get', key),
     setItem: (key, value) => ipcRenderer.invoke('vastu:storage:set', key, value),

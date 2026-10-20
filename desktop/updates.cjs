@@ -1,38 +1,49 @@
-function configureUpdates({ autoUpdater, dialog, window, save, backup, install, log }) {
-  autoUpdater.autoDownload = true;
+function configureUpdates({ autoUpdater, version, publish = () => {}, save, backup, install, log = () => {} }) {
+  autoUpdater.autoDownload = false;
   autoUpdater.autoInstallOnAppQuit = false;
-  let checking = false;
-  let manual = false;
   let downloaded = false;
+  let state = { status:'idle', version, revision:0, notice:0, percent:0 };
+  function update(patch, notify = false) {
+    state = {...state, ...patch, revision:state.revision+1, notice:state.notice+(notify?1:0)};
+    publish({...state});
+  }
+  function fail(error, retry) {
+    log(`Update ${retry} failed: ${error.message}`);
+    update({status:'error', retry, error:String(error.message || error)}, true);
+  }
   autoUpdater.on('error', error => {
-    checking = false;
-    log(`Update check failed: ${error.message}`);
-    if (manual) void dialog.showMessageBox(window(), { type:'info', message:'Could not check for updates.', detail:'Your installed app works offline. Try again when connected to the internet.' });
-    manual = false;
+    if (state.status==='error') return;
+    const retry=state.status==='downloading'?'download':'check';
+    // Scheduled checks stay quiet while offline; manual checks already opened the panel.
+    log(`Update ${retry} failed: ${error.message}`);
+    update({status:'error',retry,error:String(error.message || error)},retry==='download');
   });
-  autoUpdater.on('update-not-available', () => {
-    checking = false;
-    if (manual) void dialog.showMessageBox(window(), { message:'Vastu Grid is up to date.' });
-    manual = false;
+  autoUpdater.on('update-not-available', () => update({status:'upToDate',error:undefined}));
+  autoUpdater.on('update-available', info => update({status:'available',availableVersion:info.version,error:undefined},state.availableVersion!==info.version));
+  autoUpdater.on('download-progress', info => {
+    if(state.status!=='downloading')return;
+    const number=n=>Number.isFinite(n)?Math.max(0,n):0;
+    update({percent:Math.min(100,number(info.percent)),transferred:number(info.transferred),total:number(info.total),bytesPerSecond:number(info.bytesPerSecond)});
   });
-  autoUpdater.on('update-available', () => { checking = false; manual = false; });
-  const offerInstall = async () => {
-    const { response } = await dialog.showMessageBox(window(), {
-      type:'info', message:'A Vastu Grid update is ready.',
-      detail:'Your projects will be saved and backed up before the app restarts.',
-      buttons:['Restart to update','Later'], defaultId:1, cancelId:1,
-    });
-    if (response !== 0) return;
-    try { await save(); await backup(); install(); }
-    catch (error) { await dialog.showMessageBox(window(), { type:'error', message:'Update postponed to protect your work.', detail:error.message }); }
-  };
-  autoUpdater.on('update-downloaded', () => { downloaded = true; void offerInstall(); });
-  return async (userRequested = false) => {
-    if (downloaded) { if (userRequested) await offerInstall(); return; }
-    if (checking) return;
-    checking = true; manual = userRequested;
-    try { await autoUpdater.checkForUpdates(); }
-    catch { checking = false; /* error event supplies the user message */ }
+  autoUpdater.on('update-downloaded', info => {downloaded=true;update({status:'ready',availableVersion:info.version,percent:100,error:undefined},true);});
+  autoUpdater.on('update-cancelled', () => update({status:'available',percent:0}));
+  return {
+    getState:()=>({...state}),
+    async check(manual=false) {
+      if(['checking','downloading','ready','installing','available'].includes(state.status)){if(manual)update({},true);return;}
+      update({status:'checking',error:undefined},manual);
+      try {await autoUpdater.checkForUpdates();}catch(error){if(state.status!=='error')fail(error,'check');}
+    },
+    async download() {
+      if(state.status!=='available'&&!(state.status==='error'&&state.retry==='download'))return;
+      update({status:'downloading',percent:0,error:undefined},true);
+      try {await autoUpdater.downloadUpdate();}catch(error){if(state.status!=='error')fail(error,'download');}
+    },
+    async install() {
+      if(!downloaded||state.status==='installing')return;
+      update({status:'installing',error:undefined},true);
+      try {await save();await backup();install();}catch(error){fail(error,'install');}
+    },
   };
 }
 module.exports = { configureUpdates };

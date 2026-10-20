@@ -34,6 +34,8 @@ jobs:
         run: npm run desktop:smoke -- --packaged
       - name: Test precise map editing offline
         run: npm run desktop:map-check -- --packaged
+      - name: Test in-app update controls offline
+        run: node desktop/tests/update-ui.cjs --packaged
       - uses: actions/upload-artifact@v4
         with:
           name: vastu-windows-installer

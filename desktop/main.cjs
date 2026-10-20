@@ -75,6 +75,7 @@ else {
         webPreferences:{ preload:path.join(__dirname,'preload.cjs'), sandbox:true, contextIsolation:true, nodeIntegration:false },
       });
       main.webContents.setWindowOpenHandler(() => ({ action:'deny' }));
+      main.webContents.on('page-title-updated',event=>{event.preventDefault();main.setTitle(`Vastu Grid ${app.getVersion()}`);});
       main.webContents.on('will-navigate', (event, url) => {
         if (!url.startsWith('vastu://app/') || url.includes('/__plans/')) event.preventDefault();
       });
@@ -97,8 +98,18 @@ else {
         if (typeof content !== 'string' || Buffer.byteLength(content) > 25 * 1024 * 1024) throw new Error('Invalid DXF content.');
         return exportFile(name,'dxf',content);
       });
-      const checkUpdates = configureUpdates({ autoUpdater, dialog, window:()=>main, save:requestSave,
-        backup:()=>data.backup('before-install'), install:()=>{ allowClose=true; autoUpdater.quitAndInstall(false,true); }, log });
+      const updates = configureUpdates({ autoUpdater, version:app.getVersion(), save:requestSave,
+        publish:state=>{if(main&&!main.isDestroyed())main.webContents.send('vastu:update-state',state);},
+        backup:()=>data.backup('before-install'), install:()=>{ allowClose=true; autoUpdater.quitAndInstall(true,true); }, log });
+      handle('vastu:version',()=>app.getVersion());
+      handle('vastu:update:get',()=>updates.getState());
+      handle('vastu:update:action',async action=>{
+        if(action==='check')await updates.check(true);
+        else if(action==='download')await updates.download();
+        else if(action==='install')await updates.install();
+        else throw new Error('Invalid update action.');
+        return updates.getState();
+      });
       Menu.setApplicationMenu(Menu.buildFromTemplate([
         { label:'File', submenu:[
           { label:'Open Vastu data folder', click:()=>{ void shell.openPath(data.root); } },
@@ -108,15 +119,15 @@ else {
         { label:'Edit', submenu:[{role:'undo'},{role:'redo'},{type:'separator'},{role:'cut'},{role:'copy'},{role:'paste'},{role:'selectAll'}] },
         { label:'View', submenu:[{role:'resetZoom'},{role:'zoomIn'},{role:'zoomOut'},{role:'togglefullscreen'}] },
         { label:'Help', submenu:[
-          { label:'Check for updates', click:()=>app.isPackaged ? void checkUpdates(true) : void dialog.showMessageBox(main,{message:'Updates are checked in the installed Windows app.'}) },
+          { label:'Check for updates', click:()=>app.isPackaged ? void updates.check(true) : void dialog.showMessageBox(main,{message:'Updates are checked in the installed Windows app.'}) },
           { label:'About Vastu Grid', click:()=>{ void dialog.showMessageBox(main,{message:`Vastu Grid ${app.getVersion()}`,detail:`Core features work offline. Maps and online services require internet.\n\nYour data: ${data.root}`}); } },
         ] },
       ]));
       // Expo's initial Redirect can replace '/' before Electron's load promise settles.
       await main.loadURL('vastu://app/').catch(error => { if (error.errno !== -3 && error.code !== 'ERR_ABORTED') throw error; });
       if (app.isPackaged && !testRoot) {
-        const timer = setTimeout(()=>{ void checkUpdates(); }, 20000); timer.unref();
-        const interval = setInterval(()=>{ void checkUpdates(); }, 4*60*60*1000); interval.unref();
+        const timer = setTimeout(()=>{ void updates.check(); }, 20000); timer.unref();
+        const interval = setInterval(()=>{ void updates.check(); }, 4*60*60*1000); interval.unref();
       }
     } catch (error) { log(error.stack || error.message); dialog.showErrorBox('Vastu Grid could not start', `${error.message}\n\nExisting projects have not been reset or deleted.`); allowClose=true; app.quit(); }
   });

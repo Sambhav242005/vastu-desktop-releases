@@ -3,6 +3,7 @@ const path=require('node:path');
 const {createHash}=require('node:crypto');
 const root=path.resolve(__dirname,'..');
 const manifest=require('../renderer-manifest.json');
+if(manifest.version!==require('../desktop/package.json').version)throw new Error('Expo renderer and Windows release versions must match.');
 for(const asset of manifest.files){
   const file=path.resolve(root,asset.file);
   if(!file.startsWith(path.join(root,'desktop','web-dist')+path.sep))throw new Error('Invalid renderer path');

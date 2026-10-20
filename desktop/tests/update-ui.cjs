@@ -1,0 +1,54 @@
+const {_electron:electron,expect}=require('@playwright/test');
+const fs=require('node:fs'),path=require('node:path');
+const root=path.resolve(__dirname,'../..'),documents=fs.mkdtempSync(path.join(root,'work','update-ui-'));
+fs.writeFileSync(path.join(documents,'.vastu-test-root'),'test data only');
+(async()=>{
+ const env={...process.env,VASTU_DESKTOP_TEST_DOCUMENTS:documents};delete env.ELECTRON_RUN_AS_NODE;
+ const packaged=process.argv.includes('--packaged');
+ const app=await electron.launch({executablePath:packaged?path.join(root,'release-artifacts/desktop/win-unpacked/Vastu Grid.exe'):require('electron'),args:packaged?[]:[path.join(root,'desktop')],env});
+ try{
+  const page=await app.firstWindow();await page.setViewportSize({width:1350,height:840});await page.route(/^https?:\/\//,r=>r.abort());
+  await page.waitForFunction(()=>!!window.vastuDesktop);
+  await expect(page.getByText('Your work saves automatically on this device.').first()).toBeVisible();
+  const sample={schemaVersion:1,projects:[{schemaVersion:1,id:'update-test',name:'Update test house',type:'vastu',createdAt:1,updatedAt:1,lastRoute:'/compass',data:{width:'30',height:'40',unit:'ft',rotation:'25',style:'traditional',entrance:'N',insertX:'0',insertY:'0',siteLat:'',siteLng:'',planUri:null,planOpacity:.5,planNorth:'top',metadata:{orientationConfirmed:true}}}],lastProjectId:'update-test'};
+  await page.evaluate(async sample=>{await window.vastuDesktop.storage.setItem('vastu_workspace_v1',JSON.stringify(sample));await window.vastuDesktop.storage.setItem('vastu_onboarding_seen_v1','1');},sample);
+  await page.reload();await page.getByRole('button',{name:'Continue Update test house',exact:true}).first().click();
+  await page.getByRole('button',{name:'Settings',exact:true}).first().click();
+  const version=require('../package.json').version;
+  await expect(page.getByText(`v${version}`,{exact:true})).toBeVisible();
+  await expect.poll(()=>app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows()[0].getTitle())).toBe(`Vastu Grid ${version}`);
+  await app.evaluate(({app})=>{
+   const load=process.getBuiltinModule('module').createRequire(app.getAppPath()+'/main.cjs'),{autoUpdater}=load('electron-updater');
+   global.updateTest={downloads:0,installs:0};
+   autoUpdater.downloadUpdate=async()=>{global.updateTest.downloads++;};
+   autoUpdater.quitAndInstall=(silent,relaunch)=>{global.updateTest.installs++;global.updateTest.silent=silent;global.updateTest.relaunch=relaunch;};
+   autoUpdater.emit('update-available',{version:'1.1.12'});
+  });
+  const panel=page.getByRole('region',{name:'Application updates'});
+  await expect(panel.getByText('Update available',{exact:true})).toBeVisible();
+  await panel.getByRole('button',{name:'Later',exact:true}).click();await expect(panel).toHaveCount(0);
+  expect(await app.evaluate(()=>global.updateTest.downloads)).toBe(0);
+  await page.getByRole('button',{name:'Update available',exact:true}).click();
+  await panel.getByRole('button',{name:'Download update',exact:true}).click();
+  expect(await app.evaluate(()=>global.updateTest.downloads)).toBe(1);
+  await app.evaluate(({app})=>{const load=process.getBuiltinModule('module').createRequire(app.getAppPath()+'/main.cjs');load('electron-updater').autoUpdater.emit('download-progress',{percent:42,transferred:42*1048576,total:100*1048576,bytesPerSecond:2*1048576});});
+  await expect(panel.getByRole('progressbar',{name:'Update download progress'})).toHaveAttribute('value','42');
+  await expect(panel.getByText('42.0 MB of 100.0 MB · 2.0 MB/s',{exact:true})).toBeVisible();
+  await page.screenshot({path:path.join(root,'work','update-download-progress.png')});
+  await panel.getByRole('button',{name:'Keep working',exact:true}).click();
+  await expect(page.getByRole('button',{name:'Downloading 42%',exact:true})).toBeVisible();
+  await app.evaluate(({app})=>{const load=process.getBuiltinModule('module').createRequire(app.getAppPath()+'/main.cjs');load('electron-updater').autoUpdater.emit('error',new Error('Connection interrupted'));});
+  await expect(panel.getByText('Update needs attention',{exact:true})).toBeVisible();
+  await panel.getByRole('button',{name:'Try again',exact:true}).click();expect(await app.evaluate(()=>global.updateTest.downloads)).toBe(2);
+  await app.evaluate(({app})=>{const load=process.getBuiltinModule('module').createRequire(app.getAppPath()+'/main.cjs');load('electron-updater').autoUpdater.emit('update-downloaded',{version:'1.1.12'});});
+  await expect(panel.getByRole('button',{name:'Restart to update',exact:true})).toBeVisible();
+  await page.screenshot({path:path.join(root,'work','update-ready.png')});
+  await panel.getByRole('button',{name:'Later',exact:true}).click();expect(await app.evaluate(()=>global.updateTest.installs)).toBe(0);
+  await page.getByRole('button',{name:'Restart to update',exact:true}).click();
+  await panel.getByRole('button',{name:'Restart to update',exact:true}).click();
+  await expect.poll(()=>app.evaluate(()=>global.updateTest.installs)).toBe(1);
+  expect(await app.evaluate(()=>({silent:global.updateTest.silent,relaunch:global.updateTest.relaunch}))).toEqual({silent:true,relaunch:true});
+  expect(fs.readdirSync(path.join(documents,'Vastu','backups')).length).toBeGreaterThan(0);
+  console.log('Update UI passed: actual installed version, notification, Later, in-app progress bar/ring, retry, explicit restart, save/backup and silent install flags.');
+ }finally{await app.close();}
+})().catch(e=>{console.error(e);process.exitCode=1;});

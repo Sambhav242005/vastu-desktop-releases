@@ -2,8 +2,8 @@
   "description": "Bundled Expo web renderer for the offline Windows application. Refresh from a verified Expo desktop export when UI changes.",
   "files": [
     {
-      "file": "desktop/web-dist/_expo/static/js/web/entry-7cc03c44cb6557639203f08b61a9dca3.js",
-      "sha256": "fcc8697f1e3611e1364c5ecc546b45b5dab4ef7fdde08610796d02e562dff95b"
+      "file": "desktop/web-dist/_expo/static/js/web/entry-4623a1167838ce66010ab157799781b5.js",
+      "sha256": "50d69d6e93908c4749f41daec6f8829772c082554e5a5b6c70bad2e413c104b5"
     },
     {
       "file": "desktop/web-dist/assets/node_modules/expo-router/assets/arrow_down.017bc6ba3fc25503e5eb5e53826d48a8.png",
@@ -83,7 +83,7 @@
     },
     {
       "file": "desktop/web-dist/index.html",
-      "sha256": "a749002c72092d2a94bd7990e40fd12c61a9c18f666cf19207847e9017fe80d0"
+      "sha256": "133199e729038d456f5af8cfa8841e6bd5ed81463d45ab7647e52652b0992bed"
     },
     {
       "file": "desktop/web-dist/map-assets/images/layers-2x.png",
@@ -141,5 +141,6 @@
       "file": "desktop/web-dist/metadata.json",
       "sha256": "aa5f19cc84d41c0f8c70ececb2bc82e863227ea1e121632aca879eb616056991"
     }
-  ]
+  ],
+  "version": "1.1.11"
 }

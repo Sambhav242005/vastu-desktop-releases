@@ -1,3 +1,5 @@
-- Keep report severity labels on one line.
-- Keep short findings tables together when printing.
-- Repeat column headings on continued findings tables and avoid splitting individual rows.
+- Get update notifications inside the app with Download update and Later.
+- Follow downloads with a circular progress icon, progress bar, percentage and size.
+- Keep working during downloads and choose when to restart.
+- Save and back up projects before quiet installation and relaunch.
+- Show the actual installed version in Settings and the title bar.

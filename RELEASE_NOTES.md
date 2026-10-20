@@ -1,5 +1,4 @@
-- Apply and lock individual side lengths; unlock them before conflicting shape edits.
-- Preserve locked lengths while dragging a corner and save locks with projects.
-- Shrink corner handles and reduce overlapping labels when zooming out.
-- Show angles at corners and explain which two sides meet there.
-- Keep the existing free satellite imagery and zoom fallback.
+- Set the closing side while keeping previously entered side lengths locked.
+- Adjust connected corners together for compatible side-length and angle changes.
+- Preserve all four locked lengths when making a quadrilateral corner 90 degrees.
+- Keep failed edits open so measurements can be corrected without re-entering them.

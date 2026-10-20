@@ -1,3 +1,5 @@
-- Keep satellite imagery visible when zooming past the detail available in an area.
-- Automatically enlarge the correct portion of the nearest available satellite tile.
-- Preserve map corner positions and precise measurement controls while zooming.
+- Apply and lock individual side lengths; unlock them before conflicting shape edits.
+- Preserve locked lengths while dragging a corner and save locks with projects.
+- Shrink corner handles and reduce overlapping labels when zooming out.
+- Show angles at corners and explain which two sides meet there.
+- Keep the existing free satellite imagery and zoom fallback.

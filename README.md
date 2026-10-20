@@ -68,3 +68,5 @@ Version 1.1.7 fixes closing-side edits with existing locks. The selected corner 
 Version 1.1.8: drag the filled interior to move the entire plot while preserving lengths, length locks and corner angles. Outside drags pan the map. Undo restores the previous position; Escape cancels an active drag. Focus the boundary and use arrow keys for small nudges. The overall editing lock also prevents frame movement.
 
 Version 1.1.9: the compass and North button use geographic north independently of plot rotation. The grid still follows the plot sides. In View grid, choose Set entrance, then click the open wall. Its midpoint, outward direction and relative placement are saved and used in preview/PDF/DXF. Changing the plot angle updates the selected entrance direction; choosing a manual entrance replaces the clicked wall selection.
+
+Version 1.1.10 improves PDF report layout: severity labels no longer wrap, short findings tables stay together, and long tables repeat their headings with rows kept intact. Re-export existing reports to use the improved formatting.

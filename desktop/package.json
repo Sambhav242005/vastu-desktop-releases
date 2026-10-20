@@ -1,7 +1,7 @@
 {
   "name": "vastu-grid-desktop",
   "productName": "Vastu Grid",
-  "version": "1.1.9",
+  "version": "1.1.10",
   "description": "Offline Vastu and Kundli workspace for Windows",
   "author": "Sambhav",
   "private": true,

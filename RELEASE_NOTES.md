@@ -1,4 +1,3 @@
-- Keep geographic north independent of angled plots and correct the North button and report.
-- Enlarge the compass for readable cardinal directions.
-- Choose Set entrance in View grid, then click the open side to save its marker and direction.
-- Retain the selected entrance after restart and in PDF/DXF exports.
+- Keep report severity labels on one line.
+- Keep short findings tables together when printing.
+- Repeat column headings on continued findings tables and avoid splitting individual rows.

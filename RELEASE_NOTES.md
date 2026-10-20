@@ -1,4 +1,4 @@
-- Drag inside the plot to move the entire frame, keeping lengths, locks and angles unchanged.
-- Drag outside the plot to pan the map.
-- Undo a move or press Escape to cancel a drag.
-- Use arrow keys to nudge a focused boundary.
+- Keep geographic north independent of angled plots and correct the North button and report.
+- Enlarge the compass for readable cardinal directions.
+- Choose Set entrance in View grid, then click the open side to save its marker and direction.
+- Retain the selected entrance after restart and in PDF/DXF exports.

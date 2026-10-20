@@ -60,11 +60,17 @@ async function close(instance) {
     await active.window.getByRole('button',{name:'Confirm orientation',exact:true}).click();
     await active.window.getByRole('button',{name:'View grid',exact:true}).first().click();
     await expect(active.window.getByRole('button',{name:'Reset orientation to North Up'}).first()).toBeVisible();
+    await expect.poll(()=>active.window.getByTestId('preview-compass').evaluate(element=>Math.abs(new DOMMatrix(getComputedStyle(element).transform).b))).toBeLessThan(.001);
     await active.window.getByRole('button',{name:'Reset orientation to North Up'}).first().click();
     await expect.poll(()=>active.window.getByTestId('preview-compass').evaluate(element=>{
       const matrix=new DOMMatrix(getComputedStyle(element).transform);
       return Math.abs(matrix.a-1)<.001 && Math.abs(matrix.b)<.001;
     })).toBe(true);
+    await active.window.getByRole('button',{name:'Set entrance on plot',exact:true}).click();
+    const plotCanvas=await active.window.getByTestId('vastu-preview-canvas').boundingBox();
+    await active.window.mouse.click(plotCanvas.x+plotCanvas.width*.7,plotCanvas.y+plotCanvas.height/2);
+    await expect(active.window.getByRole('button',{name:'Set entrance on plot',exact:true})).toBeVisible();
+    await expect.poll(()=>active.window.evaluate(async()=>JSON.parse(await window.vastuDesktop.storage.getItem('vastu_workspace_v1')).projects[0].data.metadata.entrancePlacement)).toEqual({u:.5,v:0,facing:0});
     await active.window.screenshot({path:path.join(root,'work','desktop-offline-preview.png')});
     const pdfPath=path.join(documents,'Vastu','exports','offline-report.pdf');
     await active.instance.evaluate(({dialog},filePath)=>{dialog.showSaveDialog=async()=>({canceled:false,filePath});},pdfPath);
@@ -90,7 +96,7 @@ async function close(instance) {
     await expect(active.window.getByText('Offline house saved on exit',{exact:true}).first()).toBeVisible({timeout:30000});
     const persisted=await active.window.evaluate(async()=>JSON.parse(await window.vastuDesktop.storage.getItem('vastu_workspace_v1')));
     const data=persisted.projects[0].data;
-    if(data.rotation!=='90'||data.entrance!=='NW'||data.metadata.plan.uri!==plan) throw new Error('Project fields changed across restart/update');
+    if(data.rotation!=='90'||data.entrance!=='E'||data.metadata.entrancePlacement?.u!==.5||data.metadata.entrancePlacement?.v!==0||data.metadata.plan.uri!==plan) throw new Error('Project fields changed across restart/update');
     const response=await active.window.evaluate(async uri=>{
       const response=await fetch(`vastu://app/__plans/${uri.slice('vastu-plan:'.length)}`);
       return {ok:response.ok,bytes:(await response.arrayBuffer()).byteLength};

@@ -2,8 +2,8 @@
   "description": "Bundled Expo web renderer for the offline Windows application. Refresh from a verified Expo desktop export when UI changes.",
   "files": [
     {
-      "file": "desktop/web-dist/_expo/static/js/web/entry-c9a13f9ff68354a15d8ec394dac970b9.js",
-      "sha256": "7afd43326b5ef700b8b6069ee0b510bb2a9639f67c9c49ec0d99756a7f7fc6aa"
+      "file": "desktop/web-dist/_expo/static/js/web/entry-7693777c4a3f45e68f53a838208b1027.js",
+      "sha256": "0d725f7ae3aabcc2604baaf436109c64c7d341a9a0c3fe40cca302b6b3b6debf"
     },
     {
       "file": "desktop/web-dist/assets/node_modules/expo-router/assets/arrow_down.017bc6ba3fc25503e5eb5e53826d48a8.png",
@@ -83,7 +83,7 @@
     },
     {
       "file": "desktop/web-dist/index.html",
-      "sha256": "dddd912f180fa3b1bdf603064a899f5cd1d70e8e1cddf1d5c6c1de35c0155114"
+      "sha256": "e62d2d0110865b269e27fcc4f63e729c14db231341d1c294ea6c21995f5d0238"
     },
     {
       "file": "desktop/web-dist/map-assets/images/layers-2x.png",

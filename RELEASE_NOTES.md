@@ -1,4 +1,4 @@
-- Set the closing side while keeping previously entered side lengths locked.
-- Adjust connected corners together for compatible side-length and angle changes.
-- Preserve all four locked lengths when making a quadrilateral corner 90 degrees.
-- Keep failed edits open so measurements can be corrected without re-entering them.
+- Drag inside the plot to move the entire frame, keeping lengths, locks and angles unchanged.
+- Drag outside the plot to pan the map.
+- Undo a move or press Escape to cancel a drag.
+- Use arrow keys to nudge a focused boundary.

@@ -1,6 +1,5 @@
-- Edit or delete any map corner and undo boundary changes.
-- Set side lengths, compass bearings and interior angles after placing points.
-- Create a rectangle from exact width, depth and bearing.
-- Zoom further into the map with visible zoom controls.
-- See every corner coordinate and use opposite-side averages for four-point plots.
-- Windows bundles its map controls locally; map imagery still needs internet.
+- Click a side length, type the measurement and press Enter.
+- Click a corner to set its angle, make it 90 degrees or delete it.
+- Create rectangles from width, depth and rotation with a live preview.
+- Keep the map visible while editing; coordinates are optional.
+- Improved zoom controls, opposite-side averages and offline map controls.

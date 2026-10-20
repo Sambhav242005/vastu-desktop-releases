@@ -51,8 +51,8 @@ OneDrive-synced database on two PCs simultaneously.
 
 ## Precise map boundaries
 
-Open Site map, place a corner, then click its numbered marker or **Points & measurements**. Unlock editing if needed. Choose a point to edit its latitude/longitude or delete it. **Undo** restores changes during the current map session.
+Draw roughly on the map, then click a side's length label, type the measured length, and press Enter or Apply. Click a numbered corner to set its angle, choose Make 90 degrees, or delete it with the trash icon. Drag corners to move them. The map stays visible throughout; Undo restores edits during the map session.
 
-For an exact rectangle, enter width, depth and the first side bearing, then choose **Create exact rectangle**. This replaces the boundary and keeps the selected point fixed. Bearings run clockwise from true north (0? north, 90? east); depth extends to the right. Side length/bearing controls move only the next corner; the interior-angle control turns right from the incoming side. Use **Back to map ? Review plot ? Apply estimated dimensions** to apply the edited boundary to the grid.
+For a rectangle, choose Rectangle, enter width/depth and rotation, and Apply. With an empty map, the tool first asks for one corner. Dashed outlines preview changes without saving them. Rotation 0 is horizontal on the map; the +/- controls turn by 5 degrees. Existing boundaries start unlocked, with an optional lock for protection.
 
-Zoom reaches level 24 by enlarging available tiles; it does not add detail to the imagery. Windows loads its map controls locally, so saved boundary editing works when imagery is unavailable. DWG import is not included in this release.
+Review plot applies the boundary's dimensions to the grid. Corner coordinates remain available as optional details. Zoom reaches 24 by enlarging available tiles; it adds no imagery detail. Windows bundles its map library locally, so saved boundaries can be edited without imagery. DWG import is not included.

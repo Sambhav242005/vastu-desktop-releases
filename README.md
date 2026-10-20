@@ -48,3 +48,11 @@ first; newer/corrupt schemas fail without resetting data. Uninstall preserves
 Documents/Vastu. To restore, close the app, copy current data somewhere safe, then
 restore both `projects.db` and `plans/` from one backup. Avoid opening the same live
 OneDrive-synced database on two PCs simultaneously.
+
+## Precise map boundaries
+
+Open Site map, place a corner, then click its numbered marker or **Points & measurements**. Unlock editing if needed. Choose a point to edit its latitude/longitude or delete it. **Undo** restores changes during the current map session.
+
+For an exact rectangle, enter width, depth and the first side bearing, then choose **Create exact rectangle**. This replaces the boundary and keeps the selected point fixed. Bearings run clockwise from true north (0? north, 90? east); depth extends to the right. Side length/bearing controls move only the next corner; the interior-angle control turns right from the incoming side. Use **Back to map ? Review plot ? Apply estimated dimensions** to apply the edited boundary to the grid.
+
+Zoom reaches level 24 by enlarging available tiles; it does not add detail to the imagery. Windows loads its map controls locally, so saved boundary editing works when imagery is unavailable. DWG import is not included in this release.

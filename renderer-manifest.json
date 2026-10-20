@@ -2,8 +2,8 @@
   "description": "Bundled Expo web renderer for the offline Windows application. Refresh from a verified Expo desktop export when UI changes.",
   "files": [
     {
-      "file": "desktop/web-dist/_expo/static/js/web/entry-7d1376bc232faa1f8508f5c85d98ab82.js",
-      "sha256": "512d9909fd528b07714b7609e907e5c9ec975380d1011d799352ea4f612c907b"
+      "file": "desktop/web-dist/_expo/static/js/web/entry-a802dfb8cfcf38ea1e376151ea03fbed.js",
+      "sha256": "40d059442da6df92bc9ae3e3b5235d28ed20055909a1130a2d47c55ce45d7942"
     },
     {
       "file": "desktop/web-dist/assets/node_modules/expo-router/assets/arrow_down.017bc6ba3fc25503e5eb5e53826d48a8.png",
@@ -83,7 +83,59 @@
     },
     {
       "file": "desktop/web-dist/index.html",
-      "sha256": "f83eec34c26db7da1a28e1f8910476f4bf909965f44ec2f0f7595af2baddb929"
+      "sha256": "214c0667473202240154f21be426148ce0755923475c6fa7d6bf51367639ce2b"
+    },
+    {
+      "file": "desktop/web-dist/map-assets/images/layers-2x.png",
+      "sha256": "066daca850d8ffbef007af00b06eac0015728dee279c51f3cb6c716df7c42edf"
+    },
+    {
+      "file": "desktop/web-dist/map-assets/images/layers.png",
+      "sha256": "1dbbe9d028e292f36fcba8f8b3a28d5e8932754fc2215b9ac69e4cdecf5107c6"
+    },
+    {
+      "file": "desktop/web-dist/map-assets/images/marker-icon-2x.png",
+      "sha256": "00179c4c1ee830d3a108412ae0d294f55776cfeb085c60129a39aa6fc4ae2528"
+    },
+    {
+      "file": "desktop/web-dist/map-assets/images/marker-icon.png",
+      "sha256": "574c3a5cca85f4114085b6841596d62f00d7c892c7b03f28cbfa301deb1dc437"
+    },
+    {
+      "file": "desktop/web-dist/map-assets/images/marker-shadow.png",
+      "sha256": "264f5c640339f042dd729062cfc04c17f8ea0f29882b538e3848ed8f10edb4da"
+    },
+    {
+      "file": "desktop/web-dist/map-assets/leaflet-src.esm.js",
+      "sha256": "39ee93464f11fe3847137e50c0dc8189f706c460e36989ea7871bf7d540f3306"
+    },
+    {
+      "file": "desktop/web-dist/map-assets/leaflet-src.esm.js.map",
+      "sha256": "971637e327b53dfb2894543ca53b04b65801278b56ee96a708146c9b7e4735bb"
+    },
+    {
+      "file": "desktop/web-dist/map-assets/leaflet-src.js",
+      "sha256": "b4fa27bd78a8487450b75fb8ced591e66cffd4a1b55f7c87373557a6b3f680ba"
+    },
+    {
+      "file": "desktop/web-dist/map-assets/leaflet-src.js.map",
+      "sha256": "97b701c5dff0e9864e5c458a8b15c2ec33787a326c5de77b908f9ea13be2d56a"
+    },
+    {
+      "file": "desktop/web-dist/map-assets/leaflet.css",
+      "sha256": "a7837102824184820dfa198d1ebcd109ff6d0ff9a2672a074b9a1b4d147d04c6"
+    },
+    {
+      "file": "desktop/web-dist/map-assets/leaflet.js",
+      "sha256": "db49d009c841f5ca34a888c96511ae936fd9f5533e90d8b2c4d57596f4e5641a"
+    },
+    {
+      "file": "desktop/web-dist/map-assets/leaflet.js.map",
+      "sha256": "600a10dc5cd110de0699510d322afcbe01c7ca90b4c5f48adc20314c70aac753"
+    },
+    {
+      "file": "desktop/web-dist/map-assets/LICENSE",
+      "sha256": "53e8dc25862014e4324741ca18fbe3611e11d42ef69f59f86ea8c5389647d4cb"
     },
     {
       "file": "desktop/web-dist/metadata.json",

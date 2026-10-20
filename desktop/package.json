@@ -1,7 +1,7 @@
 {
   "name": "vastu-grid-desktop",
   "productName": "Vastu Grid",
-  "version": "1.1.3",
+  "version": "1.1.4",
   "description": "Offline Vastu and Kundli workspace for Windows",
   "author": "Sambhav",
   "private": true,
@@ -25,9 +25,22 @@
     "appId": "com.sambhav24.vastu.desktop",
     "productName": "Vastu Grid",
     "asar": true,
-    "directories": { "output": "../release-artifacts/desktop" },
-    "files": ["*.cjs", "package.json", "web-dist/**/*", "assets/icon.ico"],
-    "win": { "target": ["nsis"], "icon": "assets/icon.ico", "artifactName": "Vastu-Grid-Setup-${version}-${arch}.${ext}" },
+    "directories": {
+      "output": "../release-artifacts/desktop"
+    },
+    "files": [
+      "*.cjs",
+      "package.json",
+      "web-dist/**/*",
+      "assets/icon.ico"
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "assets/icon.ico",
+      "artifactName": "Vastu-Grid-Setup-${version}-${arch}.${ext}"
+    },
     "nsis": {
       "oneClick": false,
       "perMachine": false,
@@ -35,6 +48,11 @@
       "deleteAppDataOnUninstall": false,
       "createDesktopShortcut": true
     },
-    "publish": { "provider": "github", "owner": "Sambhav242005", "repo": "vastu-desktop-releases", "releaseType": "draft" }
+    "publish": {
+      "provider": "github",
+      "owner": "Sambhav242005",
+      "repo": "vastu-desktop-releases",
+      "releaseType": "draft"
+    }
   }
 }

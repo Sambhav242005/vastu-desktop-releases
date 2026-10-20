@@ -1,8 +1,6 @@
-Vastu Grid for Windows
-
-- Offline Vastu and Kundli workspace.
-- Projects and imported plans stored in Documents → Vastu.
-- PDF/DXF export and complete project backups.
-- Automatic update downloads with save-and-backup protection before restart.
-
-Windows x64. Maps and online services require internet. The current installer is unsigned.
+- Edit or delete any map corner and undo boundary changes.
+- Set side lengths, compass bearings and interior angles after placing points.
+- Create a rectangle from exact width, depth and bearing.
+- Zoom further into the map with visible zoom controls.
+- See every corner coordinate and use opposite-side averages for four-point plots.
+- Windows bundles its map controls locally; map imagery still needs internet.

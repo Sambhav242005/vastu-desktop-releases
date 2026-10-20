@@ -5,6 +5,7 @@
     "desktop:start": "npm --prefix desktop start",
     "desktop:build": "npm --prefix desktop run dist",
     "desktop:verify": "npm --prefix desktop run verify",
-    "desktop:smoke": "node desktop/tests/smoke.cjs"
+    "desktop:smoke": "node desktop/tests/smoke.cjs",
+    "desktop:map-check": "node desktop/tests/map-edit.cjs"
   }
 }

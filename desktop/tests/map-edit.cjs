@@ -88,6 +88,8 @@ fs.writeFileSync(path.join(documents,'.vastu-test-root'),'test data only');
     await frame.locator('.corner').first().click();
     await page.getByRole('button',{name:'Make 90°',exact:true}).click();
     await page.setViewportSize({width:480,height:900});
+    await expect.poll(()=>iframe.evaluate(()=>map.getSize().x===document.getElementById('m').clientWidth)).toBe(true);
+    await frame.getByRole('button',{name:'Fit plot',exact:true}).click();
     await frame.locator('.corner').first().click();
     await expect(frame.locator('.leaflet-container')).toBeVisible();
     await page.screenshot({path:path.join(root,'work','map-direct-narrow.png')});

@@ -11,6 +11,7 @@ fs.writeFileSync(path.join(documents,'.vastu-test-root'),'test data only');
   const app=await electron.launch({executablePath:packaged?path.join(root,'release-artifacts/desktop/win-unpacked/Vastu Grid.exe'):require('electron'),args:packaged?[]:[path.join(root,'desktop')],env});
   try {
     const page=await app.firstWindow();
+    await page.setViewportSize({width:1350,height:840});
     page.on('console',m=>{if(m.type()==='error'&&!m.text().includes('net::ERR_FAILED'))console.error(m.text());});
     await page.route(/^https?:\/\//,route=>route.abort());
     const sample={schemaVersion:1,projects:[{schemaVersion:1,id:'map-test',name:'Map precision test',type:'vastu',createdAt:1,updatedAt:1,lastRoute:'/sitemap',data:{width:'30',height:'40',unit:'ft',rotation:'0',style:'traditional',entrance:'N',insertX:'0',insertY:'0',siteLat:'28.6139',siteLng:'77.209',planUri:null,planOpacity:.5,planNorth:'top',metadata:{orientationConfirmed:true,siteBoundary:[{lat:28.6139,lng:77.209}]}}}],lastProjectId:'map-test'};
@@ -53,6 +54,7 @@ fs.writeFileSync(path.join(documents,'.vastu-test-root'),'test data only');
     const largeMarker=await frame.locator('.corner').first().evaluate(el=>el.getBoundingClientRect().width);
     expect(smallMarker).toBeLessThan(largeMarker);
     await expect(frame.locator('.angle').first()).toBeVisible();
+    await frame.getByRole('button',{name:'Fit plot',exact:true}).click();
     await frame.getByRole('button',{name:'Edit side 1-2',exact:true}).click();
     await expect(page.getByLabel('Length (ft)',{exact:true})).toHaveValue('40');
     await page.getByLabel('Length (ft)',{exact:true}).fill('45');

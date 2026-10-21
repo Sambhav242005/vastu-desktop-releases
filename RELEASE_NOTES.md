@@ -1,5 +1,9 @@
-- Get update notifications inside the app with Download update and Later.
-- Follow downloads with a circular progress icon, progress bar, percentage and size.
-- Keep working during downloads and choose when to restart.
-- Save and back up projects before quiet installation and relaunch.
-- Show the actual installed version in Settings and the title bar.
+Vastu Grid 1.1.14 for Windows
+
+- Download available updates automatically while continuing to work.
+- Install downloaded updates on normal close after saving and backing up projects and imported images.
+- Restart immediately from the update panel, with retry if saving or installation fails.
+- Move, resize and rotate imported plan and map images.
+- Capture numbered site maps and save PNG, CSV and PDF outputs.
+
+Existing versions before 1.1.14: choose Download update once, then Restart to update. Later releases download automatically.

@@ -10,7 +10,7 @@ Expo renderer. Android/Expo source stays private; CI does not access that repo.
 Install the EXE once. Projects, plans, exports and backups stay in **Documents / Vastu**.
 Core features work offline; maps and online services need internet. The current
 installer is unsigned, so Windows may display an unknown-publisher warning.
-Updates are announced inside the app. Choose **Download update** or **Later**. A circular icon and progress bar show the download; **Restart to update** saves and backs up before quiet installation and relaunch. Draft releases are not offered to installed apps.
+Updates download automatically in the background. A progress ring and bar show the transfer. Keep working; the update installs after saving and backing up on the next normal close. **Restart to update** applies it now and reopens the app. Failed saving/backup keeps the app open; Windows shutdown/logoff defers installation. Versions before 1.1.14 require **Download update** once to get this behavior. Draft releases are not offered to installed apps.
 
 ## Build
 

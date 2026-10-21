@@ -5,15 +5,19 @@ const { randomUUID } = require('node:crypto');
 const { DesktopData } = require('./data.cjs');
 const { registerProtocol } = require('./protocol.cjs');
 const { configureUpdates } = require('./updates.cjs');
+const { createWorkspaceClose } = require('./close-workspace.cjs');
 const { autoUpdater } = require('electron-updater');
 
 app.setName('Vastu Grid');
 // Keep cache outside Documents. Only durable user files belong in Documents/Vastu.
-app.setPath('userData', path.join(app.getPath('appData'), 'Vastu Grid'));
+const testDocuments=process.env.VASTU_DESKTOP_TEST_DOCUMENTS;
+const testProfile=testDocuments&&path.isAbsolute(testDocuments)&&fs.existsSync(path.join(testDocuments,'.vastu-test-root')) ? path.join(testDocuments,'.app-cache') : null;
+if(testProfile)fs.mkdirSync(testProfile,{recursive:true});
+app.setPath('userData', testProfile || path.join(app.getPath('appData'), 'Vastu Grid'));
 protocol.registerSchemesAsPrivileged([{ scheme:'vastu', privileges:{ standard:true, secure:true, supportFetchAPI:true, corsEnabled:true, stream:true } }]);
 if (!app.requestSingleInstanceLock()) app.quit();
 else {
-  let main, data, allowClose = false, closing = false;
+  let main, data, updates, allowClose = false, sessionEnding = false;
   const pendingSaves = new Map();
   const log = message => { console.error(message); };
   const isTrusted = event => main && !main.isDestroyed() && event.sender === main.webContents && event.senderFrame === main.webContents.mainFrame && event.senderFrame.url.startsWith('vastu://app/') && !event.senderFrame.url.includes('/__plans/');
@@ -79,28 +83,41 @@ else {
       main.webContents.on('will-navigate', (event, url) => {
         if (!url.startsWith('vastu://app/') || url.includes('/__plans/')) event.preventDefault();
       });
-      main.on('close', event => {
-        if (allowClose) return;
-        event.preventDefault();
-        if (closing) return;
-        closing = true;
-        void requestSave().then(() => { allowClose = true; main.close(); }).catch(error => {
-          closing = false;
+      main.on('query-session-end',()=>{sessionEnding=true;});
+      main.on('session-end',()=>{sessionEnding=true;});
+      main.on('close', createWorkspaceClose({
+        isAllowed:()=>allowClose, allowClose:()=>{allowClose=true;},
+        isSessionEnding:()=>sessionEnding, getUpdates:()=>updates,
+        save:requestSave, close:()=>main.close(), onError:error=>{
           void dialog.showMessageBox(main, { type:'error', message:'Your workspace could not finish saving.', detail:`${error.message}\nThe window will stay open so you can retry.` });
-        });
-      });
+        },
+      }));
       handle('vastu:storage:get', key => data.getItem(key));
       handle('vastu:storage:set', (key,value) => data.setItem(key,value));
       handle('vastu:storage:remove', key => data.removeItem(key));
       handle('vastu:plan', (base64,mime) => data.savePlan(base64,mime));
       handle('vastu:pdf', printPdf);
+      handle('vastu:google-maps', url => {
+        const target=new URL(url);
+        if(target.origin!=='https://www.google.com'||!target.pathname.startsWith('/maps/'))throw new Error('Invalid Google Maps link.');
+        return shell.openExternal(target.href);
+      });
       handle('vastu:dxf', (name,content) => {
         if (typeof content !== 'string' || Buffer.byteLength(content) > 25 * 1024 * 1024) throw new Error('Invalid DXF content.');
         return exportFile(name,'dxf',content);
       });
-      const updates = configureUpdates({ autoUpdater, version:app.getVersion(), save:requestSave,
-        publish:state=>{if(main&&!main.isDestroyed())main.webContents.send('vastu:update-state',state);},
-        backup:()=>data.backup('before-install'), install:()=>{ allowClose=true; autoUpdater.quitAndInstall(true,true); }, log });
+      handle('vastu:site-file', (name,extension,content) => {
+        if (!['csv','png'].includes(extension) || typeof content !== 'string' || Buffer.byteLength(content)>12*1024*1024) throw new Error('Invalid map export.');
+        if(extension==='png' && !/^[A-Za-z0-9+/]+={0,2}$/.test(content)) throw new Error('Invalid map image.');
+        return exportFile(name,extension,extension==='png'?Buffer.from(content,'base64'):content);
+      });
+      updates = configureUpdates({ autoUpdater, version:app.getVersion(), save:requestSave,
+        publish:state=>{if(state.status==='error')allowClose=false;if(main&&!main.isDestroyed())main.webContents.send('vastu:update-state',state);},
+        backup:()=>data.backup('before-install'), install:relaunch=>{
+          autoUpdater.quitAndInstall(true,relaunch);
+          if(updates.getState().status==='error')throw new Error(updates.getState().error);
+          allowClose=true;
+        }, log });
       handle('vastu:version',()=>app.getVersion());
       handle('vastu:update:get',()=>updates.getState());
       handle('vastu:update:action',async action=>{

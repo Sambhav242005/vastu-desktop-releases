@@ -18,6 +18,7 @@ async function launch() {
   if(actual.packaged!==packaged || actual.version!==require('../package.json').version)throw new Error(`Unexpected desktop binary: ${JSON.stringify(actual)}`);
   instance.process().stderr.on('data',chunk=>process.stderr.write(chunk));
   const window=await instance.firstWindow();
+  await window.setViewportSize({width:1350,height:900});
   window.on('console',message=>{if(message.type()==='error')console.error('renderer:',message.text());});
   console.log('Desktop window:', await window.url());
   try { await window.waitForFunction(()=>!!window.vastuDesktop,{},{timeout:15000}); }
@@ -57,16 +58,50 @@ async function close(instance) {
     await expect(active.window.getByRole('textbox',{name:'Project name',exact:true})).toHaveValue('Offline test house');
     // Change real form input, then close immediately: autosave debounce must be flushed.
     await active.window.getByRole('textbox',{name:'Project name',exact:true}).fill('Offline house draft');
-    await active.window.getByRole('button',{name:'Confirm orientation',exact:true}).click();
+    await expect(active.window.getByText(/Direction confirmed/)).toBeVisible();
     await active.window.getByRole('button',{name:'View grid',exact:true}).first().click();
     await expect(active.window.getByRole('button',{name:'Reset orientation to North Up'}).first()).toBeVisible();
+    const savedPlan=()=>active.window.evaluate(async()=>JSON.parse(await window.vastuDesktop.storage.getItem('vastu_workspace_v1')).projects[0].data.metadata.plan);
+    const beforeImage=await savedPlan();
+    await active.window.getByRole('button',{name:'Edit image · Move / Resize / Rotate',exact:true}).click();
+    const surface=active.window.getByTestId('image-transform-surface');
+    const dragImage=async(dx,dy)=>{
+      const box=await surface.boundingBox();
+      await active.window.mouse.move(box.x+box.width/2,box.y+box.height/2);
+      await active.window.mouse.down();
+      await active.window.mouse.move(box.x+box.width/2+dx,box.y+box.height/2+dy,{steps:8});
+      await active.window.mouse.up();
+    };
+    await dragImage(40,20);
+    await active.window.getByRole('button',{name:'Resize image',exact:true}).click();await dragImage(50,0);
+    await active.window.getByRole('button',{name:'Rotate image',exact:true}).click();await dragImage(50,0);
+    expect(await savedPlan()).toEqual(beforeImage);
+    await active.window.getByRole('button',{name:'Apply alignment',exact:true}).click();
+    await expect.poll(async()=>(await savedPlan()).transform.rotation).toBeGreaterThan(0);
+    const editedImage=await savedPlan();
+    expect(editedImage.transform.scale).toBeGreaterThan(beforeImage.transform.scale);
+    expect(editedImage.transform.x).not.toBe(beforeImage.transform.x);
+    await active.window.getByRole('button',{name:'Edit image · Move / Resize / Rotate',exact:true}).click();
+    await dragImage(-30,-20);
+    await active.window.getByRole('button',{name:'Cancel changes',exact:true}).click();
+    expect(await savedPlan()).toEqual(editedImage);
+    // Verify the new Windows Save As bridge writes image bytes and coordinate CSV.
+    for(const [extension,content] of [['png',png],['csv','Point,Latitude,Longitude\n1,28.613900,77.209000\n']]){
+      const filePath=path.join(documents,'Vastu','exports',`site-map.${extension}`);
+      await active.instance.evaluate(({dialog},filePath)=>{dialog.showSaveDialog=async()=>({canceled:false,filePath});},filePath);
+      await active.window.evaluate(async({extension,content})=>window.vastuDesktop.exportSiteFile('site-map',extension,content),{extension,content});
+      expect(fs.readFileSync(filePath)).toEqual(extension==='png'?Buffer.from(content,'base64'):Buffer.from(content));
+    }
     await expect.poll(()=>active.window.getByTestId('preview-compass').evaluate(element=>Math.abs(new DOMMatrix(getComputedStyle(element).transform).b))).toBeLessThan(.001);
     await active.window.getByRole('button',{name:'Reset orientation to North Up'}).first().click();
     await expect.poll(()=>active.window.getByTestId('preview-compass').evaluate(element=>{
       const matrix=new DOMMatrix(getComputedStyle(element).transform);
       return Math.abs(matrix.a-1)<.001 && Math.abs(matrix.b)<.001;
     })).toBe(true);
+    await active.window.getByRole('button',{name:'Reset view to default',exact:true}).click();
+    await expect(active.window.getByText('Zoom 1.00×',{exact:true})).toBeVisible();
     await active.window.getByRole('button',{name:'Set entrance on plot',exact:true}).click();
+    await active.window.getByTestId('vastu-preview-canvas').scrollIntoViewIfNeeded();
     const plotCanvas=await active.window.getByTestId('vastu-preview-canvas').boundingBox();
     await active.window.mouse.click(plotCanvas.x+plotCanvas.width*.7,plotCanvas.y+plotCanvas.height/2);
     await expect(active.window.getByRole('button',{name:'Set entrance on plot',exact:true})).toBeVisible();

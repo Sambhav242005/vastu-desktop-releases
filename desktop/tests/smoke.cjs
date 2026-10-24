@@ -66,10 +66,22 @@ async function close(instance) {
     await active.window.getByRole('button',{name:'Edit image · Move / Resize / Rotate',exact:true}).click();
     const surface=active.window.getByTestId('image-transform-surface');
     const dragImage=async(dx,dy)=>{
-      const box=await surface.boundingBox();
-      await active.window.mouse.move(box.x+box.width/2,box.y+box.height/2);
+      await surface.scrollIntoViewIfNeeded();
+      await surface.hover();
+      const start=await surface.evaluate(element=>{
+        const box=element.getBoundingClientRect();
+        const controls=[...element.querySelectorAll('[aria-label$="image resize handle"], [data-testid="image-rotation-handle"]')].map(node=>node.getBoundingClientRect());
+        let best=null;
+        for(let y=40;y<box.height-40;y+=20)for(let x=40;x<box.width-80;x+=20){
+          const gap=Math.min(...controls.map(control=>Math.hypot(box.x+x-control.x-control.width/2,box.y+y-control.y-control.height/2)));
+          if(!best||gap>best.gap)best={x:box.x+x,y:box.y+y,gap};
+        }
+        if(!best||best.gap<40)throw new Error('No editor drag target clear of transform handles');
+        return best;
+      });
+      await active.window.mouse.move(start.x,start.y);
       await active.window.mouse.down();
-      await active.window.mouse.move(box.x+box.width/2+dx,box.y+box.height/2+dy,{steps:8});
+      await active.window.mouse.move(start.x+dx,start.y+dy,{steps:8});
       await active.window.mouse.up();
     };
     await dragImage(40,20);
@@ -81,10 +93,26 @@ async function close(instance) {
     const editedImage=await savedPlan();
     expect(editedImage.transform.scale).toBeGreaterThan(beforeImage.transform.scale);
     expect(editedImage.transform.x).not.toBe(beforeImage.transform.x);
+    // Exercise the dedicated rotation control as well as free-surface Rotate mode.
+    await active.window.getByRole('button',{name:'Edit image · Move / Resize / Rotate',exact:true}).click();
+    const rotationHandle=active.window.getByTestId('image-rotation-handle');
+    await rotationHandle.scrollIntoViewIfNeeded();
+    await surface.hover();
+    const rotationBox=await rotationHandle.boundingBox();
+    const rotationSurface=await surface.boundingBox();
+    expect(rotationBox.x).toBeGreaterThanOrEqual(rotationSurface.x);
+    expect(rotationBox.y).toBeGreaterThanOrEqual(rotationSurface.y);
+    await active.window.mouse.move(rotationBox.x+24,rotationBox.y+24);
+    await active.window.mouse.down();
+    await active.window.mouse.move(rotationBox.x+54,rotationBox.y+34,{steps:8});
+    await active.window.mouse.up();
+    await active.window.getByRole('button',{name:'Apply alignment',exact:true}).click();
+    await expect.poll(async()=>(await savedPlan()).transform.rotation).not.toBe(editedImage.transform.rotation);
+    const handleEditedImage=await savedPlan();
     await active.window.getByRole('button',{name:'Edit image · Move / Resize / Rotate',exact:true}).click();
     await dragImage(-30,-20);
     await active.window.getByRole('button',{name:'Cancel changes',exact:true}).click();
-    expect(await savedPlan()).toEqual(editedImage);
+    expect(await savedPlan()).toEqual(handleEditedImage);
     // Verify the new Windows Save As bridge writes image bytes and coordinate CSV.
     for(const [extension,content] of [['png',png],['csv','Point,Latitude,Longitude\n1,28.613900,77.209000\n']]){
       const filePath=path.join(documents,'Vastu','exports',`site-map.${extension}`);

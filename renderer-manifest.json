@@ -1,6 +1,6 @@
 {
   "description": "Offline Expo desktop export with automatic update/restart and preserved editor drafts.",
-  "version": "1.1.16",
+  "version": "1.1.17",
   "sourceStatus": "Working tree release; source changes not committed",
   "files": [
     {
@@ -81,7 +81,7 @@
     },
     {
       "file": "desktop/web-dist/index.html",
-      "sha256": "baafca1097ccdda3cdaa424b5b22ff84b1d5b55748e7eac8c4892cd34dbc6bc5"
+      "sha256": "a769a2314b53a75cdad4b02f664550807e9c6941c9313ce7eaf64770dd1f5dd9"
     },
     {
       "file": "desktop/web-dist/map-assets/images/layers-2x.png",
@@ -144,8 +144,8 @@
       "sha256": "7beee83ffcb2bc984363bc339014a871193ac08f1f116a79a5dcaaa8261005fb"
     },
     {
-      "file": "desktop/web-dist/_expo/static/js/web/entry-84df53e6db67f3422240ede0c401327d.js",
-      "sha256": "ae2fad689720fa960ae8e49ffee7a4bec6ec84c1d246eb33a5c9b177745608f5"
+      "file": "desktop/web-dist/_expo/static/js/web/entry-4937166aac3535b2881de8a17d159dfc.js",
+      "sha256": "973a132e32e3a8aceedc160fc29fa3bb14e9cf14b3a1df86412501fd5823ea69"
     }
   ]
 }

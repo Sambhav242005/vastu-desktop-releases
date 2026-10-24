@@ -62,9 +62,22 @@ async function close(instance) {
     await active.window.getByRole('button',{name:'View grid',exact:true}).first().click();
     await expect(active.window.getByRole('button',{name:'Reset orientation to North Up'}).first()).toBeVisible();
     const savedPlan=()=>active.window.evaluate(async()=>JSON.parse(await window.vastuDesktop.storage.getItem('vastu_workspace_v1')).projects[0].data.metadata.plan);
+    const imageAppearance=element=>{
+      const image=element.querySelector('image'),boundary=element.querySelector('rect[stroke="#1c1917"]');
+      if(!image||!boundary)throw new Error('Expected shared Vastu image and boundary renderer');
+      const matrix=boundary.getScreenCTM().inverse().multiply(image.getScreenCTM()),w=boundary.width.baseVal.value,h=boundary.height.baseVal.value;
+      return {matrix:[matrix.a/w,matrix.b/h,matrix.c/w,matrix.d/h,(matrix.e-boundary.x.baseVal.value)/w,(matrix.f-boundary.y.baseVal.value)/h],opacity:image.getAttribute('opacity'),rectangles:element.querySelectorAll('rect').length};
+    };
+    const previewAppearance=await active.window.getByTestId('vastu-preview-canvas').evaluate(imageAppearance);
     const beforeImage=await savedPlan();
     await active.window.getByRole('button',{name:'Edit image · Move / Resize / Rotate',exact:true}).click();
     const surface=active.window.getByTestId('image-transform-surface');
+    await surface.scrollIntoViewIfNeeded();await surface.hover();
+    const editorAppearance=await surface.evaluate(imageAppearance);
+    expect(editorAppearance.opacity).toBe(previewAppearance.opacity);
+    expect(editorAppearance.rectangles).toBe(previewAppearance.rectangles);
+    editorAppearance.matrix.forEach((value,index)=>expect(value).toBeCloseTo(previewAppearance.matrix[index],6));
+    await active.window.screenshot({path:path.join(root,'work','image-editor-parity.png')});
     const draftSaveError=await active.instance.evaluate(({BrowserWindow,ipcMain})=>new Promise((resolve,reject)=>{
       const id='smoke-open-editor-guard',timer=setTimeout(()=>{ipcMain.removeListener('vastu:saved',listener);reject(new Error('Draft guard did not respond'));},5000);
       const listener=(event,replyId,error)=>{if(replyId!==id)return;clearTimeout(timer);ipcMain.removeListener('vastu:saved',listener);resolve(error);};
@@ -176,6 +189,6 @@ async function close(instance) {
   } catch(error) {
     if(active)console.error('Open dialog diagnostics:',await active.window.locator('[role="dialog"], [aria-modal="true"]').evaluateAll(nodes=>nodes.map(node=>({text:node.textContent?.slice(0,160),rects:node.getClientRects().length,visibility:getComputedStyle(node).visibility,display:getComputedStyle(node).display}))));
     throw error;
-  } finally { if(active)await active.instance.close(); }
+  } finally { if(active){await active.window.getByRole('button',{name:'Cancel changes',exact:true}).click({timeout:1000}).catch(()=>{});await active.instance.close();} }
 })().catch(error=>{console.error(error);process.exitCode=1;});
 function assertNoErrors(errors){if(errors.length)throw new Error(errors.join('\n'));}

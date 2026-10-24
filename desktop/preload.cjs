@@ -2,6 +2,8 @@ const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('vastuDesktop', {
   getVersion:()=>ipcRenderer.invoke('vastu:version'),
+  getTerrain:(requestId,points,sampling)=>ipcRenderer.invoke('vastu:terrain:get',requestId,points,sampling),
+  cancelTerrain:requestId=>ipcRenderer.invoke('vastu:terrain:cancel',requestId),
   updates:{
     getState:()=>ipcRenderer.invoke('vastu:update:get'),
     action:action=>ipcRenderer.invoke('vastu:update:action',action),

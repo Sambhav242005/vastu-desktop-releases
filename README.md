@@ -10,7 +10,7 @@ Expo renderer. Android/Expo source stays private; CI does not access that repo.
 Install the EXE once. Projects, plans, exports and backups stay in **Documents / Vastu**.
 Core features work offline; maps and online services need internet. The current
 installer is unsigned, so Windows may display an unknown-publisher warning.
-Updates download automatically in the background. A progress ring and bar show the transfer. Keep working; the update installs after saving and backing up on the next normal close. **Restart to update** applies it now and reopens the app. Failed saving/backup keeps the app open; Windows shutdown/logoff defers installation. Versions before 1.1.14 require **Download update** once to get this behavior. Draft releases are not offered to installed apps.
+From 1.1.16, the app checks for updates immediately at startup and every 15 minutes, retries failed checks/downloads after one minute, and automatically saves, backs up, installs and restarts after a download is ready. Open editor dialogs delay restart until their drafts are applied or cancelled. Older installed versions need one upgrade to receive this scheduler. Windows 1.1.17 also reads terrain directly online from Copernicus; no application server URL or DEM-file import is required.
 
 ## Build
 

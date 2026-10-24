@@ -20,6 +20,8 @@ if (!app.requestSingleInstanceLock()) app.quit();
 else {
   let main, data, updates, allowClose = false, sessionEnding = false;
   const pendingSaves = new Map();
+  const terrainRequests = new Map();
+  let terrainActive = 0;
   const log = message => { console.error(message); };
   const isTrusted = event => main && !main.isDestroyed() && event.sender === main.webContents && event.senderFrame === main.webContents.mainFrame && event.senderFrame.url.startsWith('vastu://app/') && !event.senderFrame.url.includes('/__plans/');
   function handle(channel, callback) {
@@ -80,6 +82,7 @@ else {
         webPreferences:{ preload:path.join(__dirname,'preload.cjs'), sandbox:true, contextIsolation:true, nodeIntegration:false },
       });
       main.webContents.setWindowOpenHandler(() => ({ action:'deny' }));
+      main.webContents.once('destroyed', () => { for (const controller of terrainRequests.values()) controller.abort(new Error('Workspace closed.')); });
       main.webContents.on('page-title-updated',event=>{event.preventDefault();main.setTitle(`Vastu Grid ${app.getVersion()}`);});
       main.webContents.on('will-navigate', (event, url) => {
         if (!url.startsWith('vastu://app/') || url.includes('/__plans/')) event.preventDefault();
@@ -96,6 +99,20 @@ else {
       handle('vastu:storage:get', key => data.getItem(key));
       handle('vastu:storage:set', (key,value) => data.setItem(key,value));
       handle('vastu:storage:remove', key => data.removeItem(key));
+      handle('vastu:terrain:cancel', requestId => {
+        if (typeof requestId === 'string' && /^[0-9a-f-]{36}$/i.test(requestId)) terrainRequests.get(requestId)?.abort(new Error('Terrain request cancelled.'));
+      });
+      handle('vastu:terrain:get', async (requestId, points, sampling) => {
+        if (typeof requestId !== 'string' || !/^[0-9a-f-]{36}$/i.test(requestId) || terrainRequests.has(requestId)) throw new Error('Invalid terrain request ID.');
+        if (!Array.isArray(points) || points.length < 3 || points.length > 100 || !['nearest','bilinear'].includes(sampling)) throw new Error('Invalid terrain request.');
+        require('./runtime/area.cjs').createTerrainArea(points);
+        if (terrainActive >= 2) throw new Error('Terrain is busy. Retry in a moment.');
+        const controller = new AbortController();
+        terrainRequests.set(requestId, controller); terrainActive += 1;
+        const timeout = setTimeout(() => controller.abort(new Error('Terrain request timed out.')), 45000);
+        try { return await require('./runtime/copernicus.cjs').loadCopernicusTerrain(points, sampling, controller.signal); }
+        finally { clearTimeout(timeout); terrainRequests.delete(requestId); terrainActive -= 1; }
+      });
       handle('vastu:plan', (base64,mime) => data.savePlan(base64,mime));
       handle('vastu:pdf', printPdf);
       handle('vastu:google-maps', url => {

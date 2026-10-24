@@ -65,6 +65,12 @@ async function close(instance) {
     const beforeImage=await savedPlan();
     await active.window.getByRole('button',{name:'Edit image · Move / Resize / Rotate',exact:true}).click();
     const surface=active.window.getByTestId('image-transform-surface');
+    const draftSaveError=await active.instance.evaluate(({BrowserWindow,ipcMain})=>new Promise((resolve,reject)=>{
+      const id='smoke-open-editor-guard',timer=setTimeout(()=>{ipcMain.removeListener('vastu:saved',listener);reject(new Error('Draft guard did not respond'));},5000);
+      const listener=(event,replyId,error)=>{if(replyId!==id)return;clearTimeout(timer);ipcMain.removeListener('vastu:saved',listener);resolve(error);};
+      ipcMain.on('vastu:saved',listener);BrowserWindow.getAllWindows()[0].webContents.send('vastu:save-before-close',id);
+    }));
+    expect(draftSaveError).toContain('Apply or cancel the open image editor');
     const dragImage=async(dx,dy)=>{
       await surface.scrollIntoViewIfNeeded();
       await surface.hover();
@@ -167,6 +173,9 @@ async function close(instance) {
     if(!response.ok||response.bytes===0)throw new Error('Imported plan lost after restart');
     await close(active.instance);active=null;
     console.log(`Desktop smoke passed (${packaged?'packaged':'development'}): offline UI, SQLite, imported plan, rotation, save on exit, restart and app-version backup.`);
+  } catch(error) {
+    if(active)console.error('Open dialog diagnostics:',await active.window.locator('[role="dialog"], [aria-modal="true"]').evaluateAll(nodes=>nodes.map(node=>({text:node.textContent?.slice(0,160),rects:node.getClientRects().length,visibility:getComputedStyle(node).visibility,display:getComputedStyle(node).display}))));
+    throw error;
   } finally { if(active)await active.instance.close(); }
 })().catch(error=>{console.error(error);process.exitCode=1;});
 function assertNoErrors(errors){if(errors.length)throw new Error(errors.join('\n'));}

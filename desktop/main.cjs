@@ -5,6 +5,7 @@ const { randomUUID } = require('node:crypto');
 const { DesktopData } = require('./data.cjs');
 const { registerProtocol } = require('./protocol.cjs');
 const { configureUpdates } = require('./updates.cjs');
+const { startAutomaticUpdates } = require('./automatic-updates.cjs');
 const { createWorkspaceClose } = require('./close-workspace.cjs');
 const { autoUpdater } = require('electron-updater');
 
@@ -147,8 +148,12 @@ else {
       // Expo's initial Redirect can replace '/' before Electron's load promise settles.
       await main.loadURL('vastu://app/').catch(error => { if (error.errno !== -3 && error.code !== 'ERR_ABORTED') throw error; });
       if (app.isPackaged && !testRoot) {
-        const timer = setTimeout(()=>{ void updates.check(); }, 20000); timer.unref();
-        const interval = setInterval(()=>{ void updates.check(); }, 4*60*60*1000); interval.unref();
+        const stop=startAutomaticUpdates({updates,canRestart:async()=>{
+          if(sessionEnding||!main||main.isDestroyed())return false;
+          // Modal editors hold drafts outside the saved workspace. Finish them first.
+          return main.webContents.executeJavaScript(`![...document.querySelectorAll('[role="dialog"], [aria-modal="true"]')].some(node=>node.getClientRects().length&&getComputedStyle(node).visibility!=='hidden')`);
+        }});
+        app.once('will-quit',stop);
       }
     } catch (error) { log(error.stack || error.message); dialog.showErrorBox('Vastu Grid could not start', `${error.message}\n\nExisting projects have not been reset or deleted.`); allowClose=true; app.quit(); }
   });

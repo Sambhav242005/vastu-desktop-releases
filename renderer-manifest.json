@@ -1,6 +1,6 @@
 {
-  "description": "Offline Expo desktop export with rectangular image handles and CAD coordinate exports.",
-  "version": "1.1.15",
+  "description": "Offline Expo desktop export with automatic update/restart and preserved editor drafts.",
+  "version": "1.1.16",
   "sourceStatus": "Working tree release; source changes not committed",
   "files": [
     {
@@ -81,7 +81,7 @@
     },
     {
       "file": "desktop/web-dist/index.html",
-      "sha256": "3e4c9fc00b34750134c7f6001aeda3040c233612a0d4d661fa81a7effb67b4a8"
+      "sha256": "baafca1097ccdda3cdaa424b5b22ff84b1d5b55748e7eac8c4892cd34dbc6bc5"
     },
     {
       "file": "desktop/web-dist/map-assets/images/layers-2x.png",
@@ -144,8 +144,8 @@
       "sha256": "7beee83ffcb2bc984363bc339014a871193ac08f1f116a79a5dcaaa8261005fb"
     },
     {
-      "file": "desktop/web-dist/_expo/static/js/web/entry-3f2ee22b839b91cf835d146984e84cbf.js",
-      "sha256": "cd03787a475f724b47cbba121cc3cddf9152fc393c0ae47eeaeafd029e2ef1d8"
+      "file": "desktop/web-dist/_expo/static/js/web/entry-84df53e6db67f3422240ede0c401327d.js",
+      "sha256": "ae2fad689720fa960ae8e49ffee7a4bec6ec84c1d246eb33a5c9b177745608f5"
     }
   ]
 }

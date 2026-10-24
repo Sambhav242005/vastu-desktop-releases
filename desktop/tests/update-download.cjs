@@ -2,13 +2,14 @@
 const {_electron:electron,expect}=require('@playwright/test');
 const fs=require('node:fs'),path=require('node:path'),http=require('node:http');
 const {createHash}=require('node:crypto');
+const {startAutomaticUpdates}=require('../automatic-updates.cjs');
 const root=path.resolve(__dirname,'../..'),output=path.join(root,'release-artifacts/desktop');
 const version=require('../package.json').version;
 fs.mkdirSync(path.join(root,'work'),{recursive:true});
 const documents=fs.mkdtempSync(path.join(root,'work','automatic-update-'));
 fs.writeFileSync(path.join(documents,'.vastu-test-root'),'test data only');
 (async()=>{
- let app,server,servedInstaller=false;
+ let app,server,stopAutomatic,servedInstaller=false;
  try{
   const installer=`Vastu-Grid-Setup-${version}-x64.exe`;
   server=http.createServer((request,response)=>{
@@ -40,8 +41,10 @@ fs.writeFileSync(path.join(documents,'.vastu-test-root'),'test data only');
    autoUpdater.on('update-downloaded',info=>{global.automaticUpdateTest.file=info.downloadedFile;});
    autoUpdater.quitAndInstall=(silent,relaunch)=>{Object.assign(global.automaticUpdateTest,{installs:global.automaticUpdateTest.installs+1,silent,relaunch});};
   },`http://127.0.0.1:${server.address().port}`);
-  // No Download button or injected update events: use the real update check and provider.
-  await page.evaluate(()=>window.vastuDesktop.updates.action('check'));
+  // Exercise the actual scheduler without buttons or injected updater events.
+  let state=await page.evaluate(()=>window.vastuDesktop.updates.getState());
+  const action=async type=>{state=await page.evaluate(type=>window.vastuDesktop.updates.action(type),type);};
+  stopAutomatic=startAutomaticUpdates({updates:{getState:()=>state,canInstall:()=>state.status==='ready'||state.retry==='install',check:()=>action('check'),download:()=>action('download'),install:()=>action('install')},canRestart:()=>page.evaluate(()=>![...document.querySelectorAll('[role="dialog"], [aria-modal="true"]')].some(node=>node.getClientRects().length&&getComputedStyle(node).visibility!=='hidden')),setTimer:(callback,delay)=>setTimeout(async()=>{state=await page.evaluate(()=>window.vastuDesktop.updates.getState());callback();},delay)});
   await expect.poll(async()=>{
    const state=await page.evaluate(()=>window.vastuDesktop.updates.getState());
    if(state.status==='error')throw new Error(state.error);return state.status;
@@ -51,12 +54,11 @@ fs.writeFileSync(path.join(documents,'.vastu-test-root'),'test data only');
   expect(transfer.downloads).toBe(1);expect(transfer.installs).toBe(0);
   expect(createHash('sha512').update(fs.readFileSync(transfer.file)).digest('hex')).toBe(createHash('sha512').update(fs.readFileSync(path.join(output,installer))).digest('hex'));
   await page.getByRole('textbox',{name:'Project name',exact:true}).fill('Saved before automatic update');
-  await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows()[0].close());
-  await expect.poll(()=>app.evaluate(()=>global.automaticUpdateTest.installs)).toBe(1);
-  expect(await app.evaluate(()=>({silent:global.automaticUpdateTest.silent,relaunch:global.automaticUpdateTest.relaunch}))).toEqual({silent:true,relaunch:false});
+  await expect.poll(()=>app.evaluate(()=>global.automaticUpdateTest.installs),{timeout:40000}).toBe(1);
+  expect(await app.evaluate(()=>({silent:global.automaticUpdateTest.silent,relaunch:global.automaticUpdateTest.relaunch}))).toEqual({silent:true,relaunch:true});
   const data=JSON.parse(await page.evaluate(()=>window.vastuDesktop.storage.getItem('vastu_workspace_v1')));
   expect(data.projects[0].name).toBe('Saved before automatic update');
   expect(fs.readdirSync(path.join(documents,'Vastu/backups')).some(name=>name.includes('before-install'))).toBe(true);
-  console.log(`PASS packaged ${version}: real provider check, automatic verified download, no forced interruption, close saves/backups then silently installs without relaunch.`);
- }finally{if(app)await app.close();if(server)await new Promise(resolve=>server.close(resolve));}
+  console.log(`PASS packaged ${version}: scheduled provider check, automatic verified download, save/backup and automatic silent restart without clicking Check, Download, Restart or Close.`);
+ }finally{stopAutomatic?.();if(app)await app.close();if(server)await new Promise(resolve=>server.close(resolve));}
 })().catch(error=>{console.error(error);process.exitCode=1;});

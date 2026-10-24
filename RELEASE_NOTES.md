@@ -1,7 +1,8 @@
-# Vastu Grid 1.1.15 for Windows
+# Vastu Grid 1.1.16 for Windows
 
-- Stretch imported images with side and corner handles, an aspect-ratio lock, and a rotation control.
-- Improved CAD label orientation and aligned image export packages.
-- Export numbered plot boundaries and coordinates for CAD workflows.
+- Checks for updates immediately at startup and every 15 minutes.
+- Automatically retries failed checks and downloads after one minute.
+- Downloads updates and restarts automatically after saving and backing up projects.
+- Open editor dialogs delay restart until you apply or cancel the draft.
 
-Online terrain requires a configured production service and is not connected in this build. The Windows installer remains unsigned.
+Older installed versions need one update to receive this behavior. Online terrain remains unconnected. The Windows installer remains unsigned.

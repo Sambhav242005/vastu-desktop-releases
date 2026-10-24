@@ -106,6 +106,10 @@ else {
         if (typeof content !== 'string' || Buffer.byteLength(content) > 25 * 1024 * 1024) throw new Error('Invalid DXF content.');
         return exportFile(name,'dxf',content);
       });
+      handle('vastu:cad-bundle', (name,content) => {
+        if (!(content instanceof Uint8Array) || content.byteLength < 1 || content.byteLength > 80 * 1024 * 1024) throw new Error('Invalid CAD bundle.');
+        return exportFile(name,'zip',Buffer.from(content));
+      });
       handle('vastu:site-file', (name,extension,content) => {
         if (!['csv','png'].includes(extension) || typeof content !== 'string' || Buffer.byteLength(content)>12*1024*1024) throw new Error('Invalid map export.');
         if(extension==='png' && !/^[A-Za-z0-9+/]+={0,2}$/.test(content)) throw new Error('Invalid map image.');

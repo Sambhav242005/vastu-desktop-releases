@@ -1,12 +1,8 @@
 {
-  "description": "Verified offline Expo desktop export, including map/image editing and automatic update UI.",
-  "version": "1.1.14",
-  "sourceCommit": "330570181910e5729d2ad819d2827dd1fe675357",
+  "description": "Offline Expo desktop export with rectangular image handles and CAD coordinate exports.",
+  "version": "1.1.15",
+  "sourceStatus": "Working tree release; source changes not committed",
   "files": [
-    {
-      "file": "desktop/web-dist/_expo/static/js/web/entry-a28fb6d67d2543f256c9a268e3511a36.js",
-      "sha256": "52e4b629873d7e1a22b91bcef2365546daaec5e684d8c1ab1d548040e6724408"
-    },
     {
       "file": "desktop/web-dist/assets/node_modules/expo-router/assets/arrow_down.017bc6ba3fc25503e5eb5e53826d48a8.png",
       "sha256": "6deca32b56b97fa1fa87facd6996b46cc45190a553400e7febdf1d2093099b57"
@@ -85,7 +81,7 @@
     },
     {
       "file": "desktop/web-dist/index.html",
-      "sha256": "43020e7ba541edb6be633f4c657953754eb8543a01a113a03ff1ce8fd9d116ae"
+      "sha256": "3e4c9fc00b34750134c7f6001aeda3040c233612a0d4d661fa81a7effb67b4a8"
     },
     {
       "file": "desktop/web-dist/map-assets/images/layers-2x.png",
@@ -142,6 +138,14 @@
     {
       "file": "desktop/web-dist/metadata.json",
       "sha256": "aa5f19cc84d41c0f8c70ececb2bc82e863227ea1e121632aca879eb616056991"
+    },
+    {
+      "file": "desktop/web-dist/_expo/static/js/web/cad-platform-3a4d0991bf0f4e6f21b02f3447fab7a3.js",
+      "sha256": "7beee83ffcb2bc984363bc339014a871193ac08f1f116a79a5dcaaa8261005fb"
+    },
+    {
+      "file": "desktop/web-dist/_expo/static/js/web/entry-3f2ee22b839b91cf835d146984e84cbf.js",
+      "sha256": "cd03787a475f724b47cbba121cc3cddf9152fc393c0ae47eeaeafd029e2ef1d8"
     }
   ]
 }

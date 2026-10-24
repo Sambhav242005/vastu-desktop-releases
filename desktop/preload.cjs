@@ -19,6 +19,7 @@ contextBridge.exposeInMainWorld('vastuDesktop', {
   savePlan: (base64, mime) => ipcRenderer.invoke('vastu:plan', base64, mime),
   exportPdf: (html, name) => ipcRenderer.invoke('vastu:pdf', html, name),
   exportDxf: (name, content) => ipcRenderer.invoke('vastu:dxf', name, content),
+  exportCadBundle: (name, content) => ipcRenderer.invoke('vastu:cad-bundle', name, content),
   exportSiteFile: (name, extension, content) => ipcRenderer.invoke('vastu:site-file', name, extension, content),
   openGoogleMaps: url => ipcRenderer.invoke('vastu:google-maps', url),
   onSaveBeforeClose: callback => {

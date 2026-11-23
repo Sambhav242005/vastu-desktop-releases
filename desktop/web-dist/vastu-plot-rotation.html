@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vastu plot rotation</title>
+<style>
+  :root { color-scheme: dark; font: 16px system-ui; background: #101419; color: #eef1f5; }
+  main { max-width: 560px; margin: 1.5rem auto; padding: 0 1rem; }
+  h1 { font-size: 1.5rem; }
+  input { display: block; width: 100%; margin: .75rem 0 1rem; }
+  select { font: inherit; }
+  svg { display: block; width: 100%; }
+  .zone { cursor: pointer; stroke: #101419; stroke-width: 1; }
+  .selected { stroke: #fff; stroke-width: 2; }
+</style>
+<main>
+  <h1>Vastu plot rotation</h1>
+  <label>Plot rotation <output>0°</output>
+    <input type="range" min="-180" max="180" value="0">
+  </label>
+  <label>Section <select></select></label>
+  <svg viewBox="0 0 400 430" role="img" aria-label="45 Vastu sections inside a rotating 30 by 20 foot plot"></svg>
+  <p aria-live="polite"></p>
+</main>
+<script>
+const slider = document.querySelector('input');
+const readBearing = () => new URLSearchParams(location.hash.slice(1)).get('bearing');
+if (readBearing() !== null) slider.remove();
+const output = document.querySelector('output');
+const select = document.querySelector('select');
+const svg = document.querySelector('svg');
+const detail = document.querySelector('p');
+const colors = { y:'#f2bc00', r:'#ac3930', b:'#1674be', g:'#249050' };
+const zones = [{ name:'Brahma', color:'y' }];
+function add(names, palette, start, step, inner, outer) {
+  names.split('|').forEach((name, i) => zones.push({
+    name, color:palette[i], start:start+i*step, end:start+(i+1)*step, inner, outer
+  }));
+}
+add('Aryama|Vivasvan|Mitra|Bhudhar', 'yrrb', 45, 90, 94, 189);
+add('Aapaha|Aapaha Vatsa', 'rr', 22.5, 22.5, 189, 296);
+add('Savita|Savitra', 'br', 112.5, 22.5, 189, 296);
+add('Indra|Jaya', 'br', 202.5, 22.5, 189, 296);
+add('Rudra|Rajya Kshma', 'bb', 292.5, 22.5, 189, 296);
+const outerNames = 'Soma|Bhujag|Aditi|Diti|Shikhi|Parjanya|Jayant|Mahendra|Surya|Satya|Bhrisha|Aakash|Anil|Pusha|Vitatha|Grihakshat|Yama|Gandharv|Bhringraj|Mrigah|Pitra|Dauwarik|Sugreev|Pushpdant|Varun|Asur|Shosha|Papya Kshma|Roga|Naga|Mukhya|Bhallat';
+const outerColors = 'ryggbggg'+'brgyybrg'+'ybygbbrb'+'rrygbbby';
+outerNames.split('|').forEach((name,i) => {
+  const offset = i % 8;
+  add(name, outerColors[i], i*11.25, 11.25, offset>=2 && offset<=5 ? 296 : 189, 390);
+});
+zones.forEach(({name},i) => {
+  const option = document.createElement('option');
+  option.value = i;
+  option.textContent = name;
+  select.append(option);
+});
+const rad = Math.PI/180;
+const rectangle = [[-15,-10],[15,-10],[15,10],[-15,10]];
+const squareCorners = [45,135,225,315];
+const halfBox = Math.sqrt(30*20)*94/780;
+const scale = 10;
+const points = vertices => vertices.map(([x,y]) => [200+x*scale,235+y*scale].join(',')).join(' ');
+
+function draw() {
+  const requestedAngle = Number(readBearing() ?? slider.value);
+  const angle = Number.isFinite(requestedAngle) ? requestedAngle : 0;
+  const selected = Number(select.value);
+  output.textContent = angle+'°';
+  detail.textContent = zones[selected].name+' · 30 × 20 ft plot';
+  const cos = Math.cos(angle*rad), sin = Math.sin(angle*rad);
+  const outline = rectangle.map(([x,y]) => [x*cos-y*sin,x*sin+y*cos]);
+  const cornerBearings = outline.map(([x,y]) => (Math.atan2(x,-y)/rad+360)%360);
+  const base = [...Array.from({length:640},(_,i) => i*0.5625),...cornerBearings];
+  const bearings = [...base,...base.map(a => a+360)].sort((a,b) => a-b);
+
+  // Find where a fixed compass ray meets the rotated plot, using plot-local coordinates.
+  function pointAt(bearing, sourceRadius) {
+    const x = Math.sin(bearing*rad), y = -Math.cos(bearing*rad);
+    const wall = Math.min(15/Math.abs(x*cos+y*sin),10/Math.abs(-x*sin+y*cos));
+    const box = halfBox/Math.max(Math.abs(x),Math.abs(y));
+    const distance = box+(sourceRadius-94)/(390-94)*(wall-box);
+    return [x*distance,y*distance];
+  }
+
+  function shape(zone,i) {
+    const samples = i === 0 ? squareCorners :
+      [zone.start,...bearings.filter(a => a>zone.start && a<zone.end),zone.end];
+    const vertices = i === 0 ? samples.map(a => pointAt(a,94)) : [
+      ...samples.map(a => pointAt(a,zone.outer)),
+      ...samples.reverse().map(a => pointAt(a,zone.inner))
+    ];
+    return '<polygon data-zone="'+i+'" class="zone'+(i===selected?' selected':'')+
+      '" fill="'+colors[zone.color]+'" points="'+points(vertices)+'"/>';
+  }
+  svg.innerHTML = zones.map((zone,i) => i===selected?'':shape(zone,i)).join('')+
+    shape(zones[selected],selected)+
+    '<polygon pointer-events="none" fill="none" stroke="#eef1f5" stroke-width="1.5" points="'+points(outline)+'"/>'+
+    '<path d="M200 43V25m-5 6 5-6 5 6" fill="none" stroke="#eef1f5" stroke-width="1.5"/>'+
+    '<text x="200" y="18" text-anchor="middle" fill="#eef1f5">N</text>';
+}
+slider.addEventListener('input',draw);
+window.addEventListener('hashchange',draw);
+select.addEventListener('change',draw);
+svg.addEventListener('click',event => {
+  const index = event.target.dataset.zone;
+  if (index === undefined) return;
+  select.value = index;
+  draw();
+});
+draw();
+</script>
+</html>

@@ -11,16 +11,19 @@ fs.writeFileSync(path.join(documents,'.vastu-test-root'),'test data only');
   const app=await electron.launch({executablePath:packaged?path.join(root,'release-artifacts/desktop/win-unpacked/Vastu Grid.exe'):require('electron'),args:packaged?[]:[path.join(root,'desktop')],env});
   try {
     const page=await app.firstWindow();
-    await page.setViewportSize({width:1350,height:840});
+    await app.evaluate(({BrowserWindow})=>{const win=BrowserWindow.getAllWindows()[0];win.webContents.setBackgroundThrottling(false);win.setSize(1350,900);win.setTitle('Vastu Grid — automated map test');});
     page.on('console',m=>{if(m.type()==='error'&&!m.text().includes('net::ERR_FAILED'))console.error(m.text());});
     await page.route(/^https?:\/\//,route=>route.abort());
     const sample={schemaVersion:1,projects:[{schemaVersion:1,id:'map-test',name:'Map precision test',type:'vastu',createdAt:1,updatedAt:1,lastRoute:'/sitemap',data:{width:'30',height:'40',unit:'ft',rotation:'0',style:'traditional',entrance:'N',insertX:'0',insertY:'0',siteLat:'28.6139',siteLng:'77.209',planUri:null,planOpacity:.5,planNorth:'top',metadata:{orientationConfirmed:true,siteBoundary:[{lat:28.6139,lng:77.209}]}}}],lastProjectId:'map-test'};
     await page.waitForFunction(()=>!!window.vastuDesktop);
     await expect(page.getByText('Your work saves automatically on this device.').first()).toBeVisible();
+    const birth={name:'Anita',gender:'female',date:'2000-01-01',time:'12:00',place:'Delhi',timeZone:'Asia/Kolkata'};
+sample.projects[0].kundli={birth,latitude:'28.6',longitude:'77.2',manual:true,selectedPlace:true,editing:false,lastCalculatedBirth:{...birth,latitude:28.6,longitude:77.2}};
     await page.evaluate(sample=>window.vastuDesktop.storage.setItem('vastu_workspace_v1',JSON.stringify(sample)),sample);
     await page.reload();
-    await page.getByRole('button',{name:'Continue Map precision test',exact:true}).first().click();
-    await page.getByRole('button',{name:'Site map',exact:true}).first().click();
+    await page.getByRole('button',{name:'Open project Map precision test',exact:true}).click();
+    await page.getByRole('button',{name:'Next: Vastu',exact:true}).click();
+    await page.getByRole('button',{name:'Draw on map',exact:true}).click();
     await page.getByRole('button',{name:'Open online map',exact:true}).click();
     const frame=page.frameLocator('iframe');
     await expect(frame.locator('.leaflet-container')).toBeVisible({timeout:30000});
@@ -42,7 +45,7 @@ fs.writeFileSync(path.join(documents,'.vastu-test-root'),'test data only');
     await page.getByLabel('Rotation (°)',{exact:true}).fill('30');
     expect(await iframe.evaluate(()=>pts.length)).toBe(1,'Preview must not change saved boundary');
     await expect(frame.locator('path[stroke-dasharray="7 7"]')).toHaveAttribute('d',/L/);
-    await page.screenshot({path:path.join(root,'work','map-direct-rectangle.png')});
+    if(process.env.VASTU_QA_SCREENSHOTS){await page.screenshot({path:path.join(root,'work','map-direct-rectangle.png')});}
     await page.getByRole('button',{name:'Apply',exact:true}).click();
     await expect(frame.locator('.corner')).toHaveCount(4);
     const boundary=await iframe.evaluate(()=>pts);
@@ -76,11 +79,11 @@ fs.writeFileSync(path.join(documents,'.vastu-test-root'),'test data only');
     await page.mouse.up();
     expect(await iframe.evaluate(()=>pts[1])).not.toEqual(beforeDrag);
     await expect.poll(()=>iframe.evaluate(()=>Math.abs(math.distance(pts[0],pts[1])-edgeLocks[0]))).toBeLessThan(.002);
-    await page.screenshot({path:path.join(root,'work','map-locked-length.png')});
+    if(process.env.VASTU_QA_SCREENSHOTS){await page.screenshot({path:path.join(root,'work','map-locked-length.png')});}
     await page.getByRole('button',{name:'Unlock length',exact:true}).click();
     await page.getByRole('button',{name:'Close edit',exact:true}).click();
     await frame.locator('.corner').nth(1).click();
-    await page.screenshot({path:path.join(root,'work','map-direct-corner.png')});
+    if(process.env.VASTU_QA_SCREENSHOTS){await page.screenshot({path:path.join(root,'work','map-direct-corner.png')});}
     await page.getByRole('button',{name:'Delete corner',exact:true}).click();
     expect(await iframe.evaluate(()=>pts.length)).toBe(3);
     await frame.getByRole('button',{name:'Undo',exact:true}).click();
@@ -92,9 +95,9 @@ fs.writeFileSync(path.join(documents,'.vastu-test-root'),'test data only');
     await frame.getByRole('button',{name:'Fit plot',exact:true}).click();
     await frame.locator('.corner').first().click();
     await expect(frame.locator('.leaflet-container')).toBeVisible();
-    await page.screenshot({path:path.join(root,'work','map-direct-narrow.png')});
+    if(process.env.VASTU_QA_SCREENSHOTS){await page.screenshot({path:path.join(root,'work','map-direct-narrow.png')});}
     await page.getByRole('button',{name:'Close edit',exact:true}).click();
-    await page.setViewportSize({width:1350,height:840});
+    await app.evaluate(({BrowserWindow})=>{const win=BrowserWindow.getAllWindows()[0];win.webContents.setBackgroundThrottling(false);win.setSize(1350,900);win.setTitle('Vastu Grid — automated map test');});
     // Reproduce the screenshot: lock three 30 ft sides, then close the fourth.
     await iframe.evaluate(()=>{
       const a=pts[0],s=9.144,q=[a,math.move(a,s,60)];q.push(math.move(q[1],s,150));q.push(math.move(q[2],s,245));
@@ -117,7 +120,7 @@ fs.writeFileSync(path.join(documents,'.vastu-test-root'),'test data only');
     await expect(page.getByTestId('boundary-editor')).toHaveCount(0);
     expect(await iframe.evaluate(()=>Math.abs(math.angle(pts,0)-90))).toBeLessThan(.001);
     expect(await iframe.evaluate(()=>edgeLocks.every((d,i)=>d!==null&&Math.abs(math.distance(pts[i],pts[(i+1)%4])-9.144)<.0001))).toBe(true);
-    await page.screenshot({path:path.join(root,'work','map-four-locked-sides.png')});
+    if(process.env.VASTU_QA_SCREENSHOTS){await page.screenshot({path:path.join(root,'work','map-four-locked-sides.png')});}
     // Drag the filled middle with all four lengths locked; the map stays still.
     const beforeFrame=await iframe.evaluate(()=>({points:pts.map(p=>({...p})),locks:edgeLocks.slice(),center:map.getCenter(),angles:pts.map((_,i)=>math.angle(pts,i))}));
     async function dragFrame(cancel=false){
@@ -157,12 +160,12 @@ fs.writeFileSync(path.join(documents,'.vastu-test-root'),'test data only');
     expect(await iframe.evaluate(()=>pts)).toEqual(beforeFrame.points);
     await dragFrame();
     await expect.poll(()=>page.evaluate(async()=>JSON.parse(await window.vastuDesktop.storage.getItem('vastu_workspace_v1')).projects.find(p=>p.id==='map-test').data.metadata.siteBoundary)).toEqual(await iframe.evaluate(()=>pts));
-    await page.screenshot({path:path.join(root,'work','map-move-frame.png')});
+    if(process.env.VASTU_QA_SCREENSHOTS){await page.screenshot({path:path.join(root,'work','map-move-frame.png')});}
     await frame.getByRole('button',{name:'Review plot',exact:true}).click();
     await expect(page.getByText('Opposite-side averages:',{exact:false})).toBeVisible();
     const finalBoundary=await iframe.evaluate(()=>pts);
     await expect.poll(()=>page.evaluate(async()=>JSON.parse(await window.vastuDesktop.storage.getItem('vastu_workspace_v1')).projects.find(p=>p.id==='map-test').data.metadata.siteBoundary)).toEqual(finalBoundary);
-    await page.screenshot({path:path.join(root,'work','map-precision-review.png')});
+    if(process.env.VASTU_QA_SCREENSHOTS){await page.screenshot({path:path.join(root,'work','map-precision-review.png')});}
     await page.getByRole('button',{name:'Continue editing',exact:true}).click();
     const liveSatellite=process.argv.includes('--live-satellite');
     const fixture=await page.evaluate(()=>{const c=document.createElement('canvas');c.width=c.height=256;const g=c.getContext('2d');g.fillStyle='#46734b';g.fillRect(0,0,256,256);return c.toDataURL('image/png').split(',')[1];});
@@ -180,7 +183,7 @@ fs.writeFileSync(path.join(documents,'.vastu-test-root'),'test data only');
     await expect.poll(()=>satelliteTiles.evaluateAll(tiles=>tiles.some(t=>Number(t.dataset.sourceZoom)<Number(t.dataset.requestZoom)))).toBe(true);
     expect(await iframe.evaluate(()=>map.getZoom())).toBe(24);
     expect(await iframe.evaluate(()=>pts)).toEqual(finalBoundary);
-    await page.screenshot({path:path.join(root,'work',liveSatellite?'ratlam-satellite-zoom.png':'satellite-fallback-test.png')});
+    if(process.env.VASTU_QA_SCREENSHOTS){await page.screenshot({path:path.join(root,'work',liveSatellite?'ratlam-satellite-zoom.png':'satellite-fallback-test.png')});}
     console.log('Windows map UI passed: side editing, locked lengths, angles, whole-frame drag, cancel, Undo, keyboard move, outside pan and saved geometry.');
     console.log('Satellite zoom passed: missing high-detail tiles enlarge available imagery at zoom 24; boundary unchanged.');
   } finally {await app.close();}

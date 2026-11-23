@@ -26,7 +26,7 @@ function registerProtocol(protocol, net, webRoot, data) {
       // Local UI only gets the preload bridge. Plan files are images, never documents.
       response.headers.set('X-Content-Type-Options', 'nosniff');
       if (new URL(request.url).pathname.startsWith('/__plans/')) response.headers.set('Content-Type', {'.png':'image/png','.jpg':'image/jpeg','.webp':'image/webp','.gif':'image/gif'}[path.extname(file)]);
-      else response.headers.set('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https:; worker-src 'self' blob:; frame-src https:; object-src 'none'; base-uri 'self'");
+      else response.headers.set('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https:; worker-src 'self' blob:; frame-src 'self' https:; object-src 'none'; base-uri 'self'");
       return response;
     } catch { return new Response('Not found', { status: 404 }); }
   });

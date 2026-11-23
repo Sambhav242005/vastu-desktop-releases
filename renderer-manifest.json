@@ -1,8 +1,12 @@
 {
-  "description": "Offline Expo desktop export with automatic update/restart and preserved editor drafts.",
-  "version": "1.1.17",
-  "sourceStatus": "Working tree release; source changes not committed",
+  "description": "Verified offline Expo renderer with Kundli-first Astro Vastu workflow and directional exports.",
+  "version": "1.1.18",
+  "sourceStatus": "Source commit ffaccaec7aafe8bfd288aec5ec276d8348583c2e",
   "files": [
+    {
+      "file": "desktop/web-dist/_expo/static/js/web/entry-a6ae3b1cc29cf07a69b6a93d354c84e4.js",
+      "sha256": "87237f7d31f57d9c3362767f8d987d2336d264fad79c01aaf97066bc2ea4fbe6"
+    },
     {
       "file": "desktop/web-dist/assets/node_modules/expo-router/assets/arrow_down.017bc6ba3fc25503e5eb5e53826d48a8.png",
       "sha256": "6deca32b56b97fa1fa87facd6996b46cc45190a553400e7febdf1d2093099b57"
@@ -81,7 +85,11 @@
     },
     {
       "file": "desktop/web-dist/index.html",
-      "sha256": "a769a2314b53a75cdad4b02f664550807e9c6941c9313ce7eaf64770dd1f5dd9"
+      "sha256": "176bc63ff896329c1d55f2eaec5144234f5bfe7af93a6769b8345cf26b46bd54"
+    },
+    {
+      "file": "desktop/web-dist/map-assets/LICENSE",
+      "sha256": "53e8dc25862014e4324741ca18fbe3611e11d42ef69f59f86ea8c5389647d4cb"
     },
     {
       "file": "desktop/web-dist/map-assets/images/layers-2x.png",
@@ -132,20 +140,12 @@
       "sha256": "600a10dc5cd110de0699510d322afcbe01c7ca90b4c5f48adc20314c70aac753"
     },
     {
-      "file": "desktop/web-dist/map-assets/LICENSE",
-      "sha256": "53e8dc25862014e4324741ca18fbe3611e11d42ef69f59f86ea8c5389647d4cb"
-    },
-    {
       "file": "desktop/web-dist/metadata.json",
       "sha256": "aa5f19cc84d41c0f8c70ececb2bc82e863227ea1e121632aca879eb616056991"
     },
     {
-      "file": "desktop/web-dist/_expo/static/js/web/cad-platform-3a4d0991bf0f4e6f21b02f3447fab7a3.js",
-      "sha256": "7beee83ffcb2bc984363bc339014a871193ac08f1f116a79a5dcaaa8261005fb"
-    },
-    {
-      "file": "desktop/web-dist/_expo/static/js/web/entry-4937166aac3535b2881de8a17d159dfc.js",
-      "sha256": "973a132e32e3a8aceedc160fc29fa3bb14e9cf14b3a1df86412501fd5823ea69"
+      "file": "desktop/web-dist/vastu-plot-rotation.html",
+      "sha256": "567f614bf16de16bc34d3b203df9046c0547a328ac8276d6beca3bc2f580b946"
     }
   ]
 }

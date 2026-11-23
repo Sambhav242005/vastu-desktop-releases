@@ -1,7 +1,7 @@
 {
   "name": "vastu-grid-desktop",
   "productName": "Vastu Grid",
-  "version": "1.1.17",
+  "version": "1.1.18",
   "description": "Offline Vastu and Kundli workspace for Windows",
   "author": "Sambhav",
   "private": true,
@@ -14,8 +14,8 @@
     "smoke": "node tests/smoke.cjs"
   },
   "dependencies": {
-    "geotiff": "3.0.5",
-    "electron-updater": "6.8.9"
+    "electron-updater": "6.8.9",
+    "geotiff": "3.0.5"
   },
   "devDependencies": {
     "electron": "44.9.0",
@@ -31,11 +31,11 @@
     },
     "files": [
       "*.cjs",
-      "node_modules/geotiff/**/*",
-      "runtime/*.cjs",
       "package.json",
       "web-dist/**/*",
-      "assets/icon.ico"
+      "assets/icon.ico",
+      "node_modules/geotiff/**/*",
+      "runtime/*.cjs"
     ],
     "win": {
       "target": [

@@ -1,11 +1,11 @@
 {
   "description": "Verified offline Expo renderer with Kundli-first Astro Vastu workflow and directional exports.",
   "version": "1.1.18",
-  "sourceStatus": "Source commit 086d6e6aee66e046477c4188444fe1d8e6b5559b",
+  "sourceStatus": "Source commit 477e82eac43d897d979fd69d0286a6df3085a58b",
   "files": [
     {
-      "file": "desktop/web-dist/_expo/static/js/web/entry-3afbb546b2c433d549a337a346c2d277.js",
-      "sha256": "0d4675137237f180d827e19270610f72b3d4ab8efac40ff5fd0f4f1f8afb3e7b"
+      "file": "desktop/web-dist/_expo/static/js/web/entry-0faa08bd4087ec3c4fba5927b67c368c.js",
+      "sha256": "fc0e0ef01b0932a515f49f1d2ec8613d6617c0562139ec4c7272ae410d183ce3"
     },
     {
       "file": "desktop/web-dist/assets/node_modules/expo-router/assets/arrow_down.017bc6ba3fc25503e5eb5e53826d48a8.png",
@@ -85,7 +85,7 @@
     },
     {
       "file": "desktop/web-dist/index.html",
-      "sha256": "989a054ceb0a7161939267de595e811125f75ba50ff824a8f38d0a0ca6af242c"
+      "sha256": "eaec8c9f47f13d9a55e3aff9674da6c57437ab67d67be0c0c548495de4f1f392"
     },
     {
       "file": "desktop/web-dist/map-assets/LICENSE",

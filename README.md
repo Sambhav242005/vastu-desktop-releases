@@ -12,6 +12,8 @@ Core features work offline; maps and online services need internet. The current
 installer is unsigned, so Windows may display an unknown-publisher warning.
 From 1.1.16, the app checks for updates immediately at startup and every 15 minutes, retries failed checks/downloads after one minute, and automatically saves, backs up, installs and restarts after a download is ready. Open editor dialogs delay restart until their drafts are applied or cancelled. Older installed versions need one upgrade to receive this scheduler. Windows 1.1.17 also reads terrain directly online from Copernicus; no application server URL or DEM-file import is required.
 
+Version 1.1.18 uses one Astro Vastu project. Create or reopen a project to start with Kundli, then choose Next: Vastu for plot setup. The colored 45-section page is the final review/export page. PDF and DXF exports use its geometry and selected units. Windows uses the same light palette and green accents as mobile. Existing plan files remain stored, with overlay tools pending integration into the new review page.
+
 ## Build
 
 ```powershell

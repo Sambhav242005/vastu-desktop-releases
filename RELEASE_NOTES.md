@@ -6,6 +6,7 @@
 - New birth details start with no gender selected. Next validates and saves the Kundli before opening Vastu.
 - Existing projects, birth details, notes, imported plan files and backups are preserved.
 - Retain automatic updates and direct online Copernicus terrain for mapped plots.
+- Preserve the map center during resizes and whole-plot dragging.
 
 The new PDF includes the directional layout, plot measurements, saved birth details and a section legend. Plan-image overlays and personalized Astro Vastu interpretation remain pending. Copernicus data needs internet and has roughly 30 m source spacing. The Windows installer remains unsigned.
 

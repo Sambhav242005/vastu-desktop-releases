@@ -121,6 +121,13 @@ sample.projects[0].kundli={birth,latitude:'28.6',longitude:'77.2',manual:true,se
     expect(await iframe.evaluate(()=>Math.abs(math.angle(pts,0)-90))).toBeLessThan(.001);
     expect(await iframe.evaluate(()=>edgeLocks.every((d,i)=>d!==null&&Math.abs(math.distance(pts[i],pts[(i+1)%4])-9.144)<.0001))).toBe(true);
     if(process.env.VASTU_QA_SCREENSHOTS){await page.screenshot({path:path.join(root,'work','map-four-locked-sides.png')});}
+    // A late tile-error banner or editor transition can resize the map.
+    // Keep geographic center fixed before testing the whole-plot drag.
+    await expect.poll(()=>iframe.evaluate(()=>selected)).toBe(-1);
+    const beforeResize=await iframe.evaluate(()=>({center:map.getCenter(),height:map.getSize().y}));
+    await iframe.evaluate(height=>{const el=document.getElementById('m');el.style.flex='none';el.style.height=(height-24)+'px';},beforeResize.height);
+    await expect.poll(()=>iframe.evaluate(()=>map.getSize().y)).toBe(beforeResize.height-24);
+    expect(await iframe.evaluate(center=>map.distance(center,map.getCenter()),beforeResize.center)).toBeLessThan(.001);
     // Drag the filled middle with all four lengths locked; the map stays still.
     const beforeFrame=await iframe.evaluate(()=>({points:pts.map(p=>({...p})),locks:edgeLocks.slice(),center:map.getCenter(),angles:pts.map((_,i)=>math.angle(pts,i))}));
     async function dragFrame(cancel=false){
@@ -139,7 +146,7 @@ sample.projects[0].kundli={birth,latitude:'28.6',longitude:'77.2',manual:true,se
     const movedFrame=await iframe.evaluate(()=>pts);
     movedFrame.forEach((p,i)=>expect(p).not.toEqual(beforeFrame.points[i]));
     expect(await iframe.evaluate(()=>edgeLocks)).toEqual(beforeFrame.locks);
-    expect(await iframe.evaluate(()=>map.getCenter())).toEqual(beforeFrame.center);
+    expect(await iframe.evaluate(center=>map.distance(center,map.getCenter()),beforeFrame.center)).toBeLessThan(.001);
     expect(await iframe.evaluate(()=>edgeLocks.every((d,i)=>Math.abs(math.distance(pts[i],pts[(i+1)%4])-d)<.0001))).toBe(true);
     const movedAngles=await iframe.evaluate(()=>pts.map((_,i)=>math.angle(pts,i)));
     movedAngles.forEach((v,i)=>expect(Math.abs(v-beforeFrame.angles[i])).toBeLessThan(.00001));
